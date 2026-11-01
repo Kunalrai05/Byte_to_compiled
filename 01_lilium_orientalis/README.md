@@ -61,7 +61,7 @@ python generate_lily_animation.py --export --res 1080x1920
 ```
 
 The video file is automatically saved to:
-`D:\projects\python_demos\lilium_orientalis\lilium_orientalis_reel.mp4`
+`01_lilium_orientalis/lilium_orientalis_reel.mp4`
 
 ---
 

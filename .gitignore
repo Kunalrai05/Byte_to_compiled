@@ -18,6 +18,8 @@ Thumbs.db
 *.tmp
 *_dump.html
 
-# Media (Optional: comment out if you want to track exported MP4s in git)
-# *.mp4
-# *.avi
+# Media & heavy video files (keep repo lightweight and source code only)
+*.mp4
+*.avi
+*.mkv
+*.mov
