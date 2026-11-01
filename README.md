@@ -13,7 +13,7 @@ Every episode is self-contained, lightweight, and includes both a **real-time fu
 | # | Project Title | Description | Tech Stack | Status |
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
-| **02** | **Neural Synapse Visualizer** | Glowing 3D neural brain network with electric signal impulses pulsating to audio frequencies. | `ModernGL`, `SoundDevice` | ⏳ Planned |
+| **02** | [**Synaptic Connectome**](02_neural_synapse/) | Glowing 3D neural brain network with traveling electrical action potentials and live EEG oscilloscope HUD. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
 | **03** | **Cyberpunk Terminal Radar** | Retro-futuristic ASCII / wireframe rotating radar detecting nearby signals. | `Rich`, `Colorama`, `OpenCV` | ⏳ Planned |
 | **04** | **Chaos Theory (Double Pendulum)** | Mesmerizing chaotic pendulum with neon glowing light trails and fractal wake. | `Pygame`, `SciPy` | ⏳ Planned |
 | **05** | **The Boss Detector (Panic Switch)** | OpenCV webcam face tracker that minimizes games to Excel spreadsheets when someone approaches. | `OpenCV`, `PyAutoGUI` | ⏳ Planned |
