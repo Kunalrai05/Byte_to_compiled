@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch dumps
+*.tmp
+*_dump.html
+
+# Media (Optional: comment out if you want to track exported MP4s in git)
+# *.mp4
+# *.avi
