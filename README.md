@@ -54,10 +54,3 @@ python generate_lily_animation.py
   * `E`: Export direct 9:16 MP4 Reel video
 
 ---
-
-## 📜 Social Media Script Template
-
-Every reel follows the high-retention 3-part viral formula:
-1. **The Hook (0:00–0:03):** Cold code in VS Code editor (`generate_lily_animation.py`). Text: *"What happens when imagination meets Python?"*
-2. **The Progression (0:03–0:08):** Wireframe compilation begins and unfolds.
-3. **The Climax (0:08–0:14):** Full procedural bloom with glowing lighting and audio drop. Text: *"Something beautiful gets compiled. 🌷"*
