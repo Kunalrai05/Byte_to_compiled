@@ -1,15 +1,16 @@
 """
-Astrophysics Telemetry HUD (Heads-Up Display) overlay for Gargantua Black Hole.
+Physics Telemetry HUD (Heads-Up Display) overlay for Harmonic Pendulum Wave.
 Adapts dynamically to both widescreen laptop desktop (16:9) and vertical reels (9:16).
 Generates technical typography, stage progression indicators,
-scanning reticles, and relativistic astrophysics telemetry.
+real-time wave pattern classification, and frequency telemetry.
 """
 
 import math
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+import pendulum_geometry
 
-class AstrophysicsHUD:
+class PendulumHUD:
     def __init__(self, width=1536, height=864):
         self.width = width
         self.height = height
@@ -18,10 +19,10 @@ class AstrophysicsHUD:
     def _load_fonts(self):
         """Load clean monospaced or modern sans-serif fonts."""
         font_names = [
-            "C:\\Windows\\Fonts\\consolab.ttf",
-            "C:\\Windows\\Fonts\\consola.ttf",
             "C:\\Windows\\Fonts\\YuGothM.ttc",
             "C:\\Windows\\Fonts\\msgothic.ttc",
+            "C:\\Windows\\Fonts\\consolab.ttf",
+            "C:\\Windows\\Fonts\\consola.ttf",
             "Consolas", "Courier New", "cour.ttf", "Arial", "arial.ttf"
         ]
         self.font_title = None
@@ -65,15 +66,15 @@ class AstrophysicsHUD:
         c_white      = (248, 250, 255, 240)
         c_dim        = (175, 200, 225, 160)
         c_bar_bg     = (40, 60, 85, 110)
-        c_gold_glow  = (255, 195, 100, 240)
-        c_orange_red = (255, 125, 60, 240)
+
+        pattern_name, pattern_color = pendulum_geometry.get_wave_pattern_info(current_time, total_duration)
 
         # 1. Header (Top HUD)
         margin_x = int(w * 0.05) if is_widescreen else int(w * 0.08)
         top_y = int(h * 0.05)
 
-        draw.text((margin_x, top_y), "GARGANTUA // KERR SINGULARITY", font=self.font_title, fill=c_white)
-        draw.text((margin_x, top_y + int(h * 0.038)), "GENERAL RELATIVITY // GRAVITATIONAL LENSING & EINSTEIN RING", font=self.font_small, fill=c_dim)
+        draw.text((margin_x, top_y), "HARMONIC PENDULUM WAVE // 調和振り子", font=self.font_title, fill=c_white)
+        draw.text((margin_x, top_y + int(h * 0.038)), "KINETIC HARMONICS // FREQUENCY DISPERSION & COHERENCE", font=self.font_small, fill=c_dim)
 
         # Technical tick marks across top
         line_y = top_y + int(h * 0.065)
@@ -84,13 +85,13 @@ class AstrophysicsHUD:
             tx = int(margin_x + tick * ((right_x - margin_x) / float(num_ticks - 1)))
             draw.line([(tx, line_y - 3), (tx, line_y + 3)], fill=(160, 210, 240, 140), width=1)
 
-        # Top-right astrophysics telemetry
-        dilation_hrs = 1.0 + 6.0 * min(1.0, current_time / 10.0)
+        # Top-right telemetry
+        phase_deg = (current_time / total_duration) * 360.0
         if is_widescreen:
-            telemetry = f"MASS: 100M_SOLAR  //  a/M: 0.998  //  1h = {dilation_hrs:.1f}yr"
+            telemetry = f"HARMONICS: N = 24  //  CYCLE: T = 14.0s  //  PHASE: {phase_deg:.1f}°"
             telem_y = top_y + int(h * 0.012)
         else:
-            telemetry = f"MASS: 100M_SOLAR  //  a: 0.998  //  1h = {dilation_hrs:.1f}yr"
+            telemetry = f"HARMONICS: N = 24  //  T = 14.0s  //  φ: {phase_deg:.0f}°"
             telem_y = line_y + int(h * 0.010)
 
         try:
@@ -98,25 +99,12 @@ class AstrophysicsHUD:
             telem_w = bbox_t[2] - bbox_t[0]
             telem_x = right_x - telem_w
         except Exception:
-            telem_x = right_x - int(w * 0.40)
+            telem_x = right_x - int(w * 0.38)
         draw.text((telem_x, telem_y), telemetry, font=self.font_small, fill=c_cyan_glow)
 
         # 2. Stage progression (Bottom HUD)
-        if current_time < 3.8:
-            stage_num = "STAGE 01"
-            stage_desc = "SPACETIME CURVATURE & GEODESIC FUNNEL"
-            stage_color = (120, 240, 255, 240)
-        elif current_time < 7.8:
-            stage_num = "STAGE 02"
-            stage_desc = "ACCRETION DISK IGNITION & RELATIVISTIC BEAMING"
-            stage_color = c_gold_glow
-        else:
-            stage_num = "STAGE 03"
-            stage_desc = "EVENT HORIZON & EINSTEIN RING FORMATION"
-            stage_color = c_white
-
         bottom_y = int(h * 0.88)
-        draw.text((margin_x, bottom_y), f"{stage_num} // {stage_desc}", font=self.font_sub, fill=stage_color)
+        draw.text((margin_x, bottom_y), f"PATTERN // {pattern_name}", font=self.font_sub, fill=pattern_color)
 
         # Progress bar
         bar_x0 = margin_x
@@ -127,15 +115,14 @@ class AstrophysicsHUD:
         draw.line([(bar_x0, bar_y), (bar_x1, bar_y)], fill=c_bar_bg, width=bar_h)
         fill_x = int(bar_x0 + (bar_x1 - bar_x0) * progress)
         if fill_x > bar_x0:
-            draw.line([(bar_x0, bar_y), (fill_x, bar_y)], fill=stage_color, width=bar_h)
+            draw.line([(bar_x0, bar_y), (fill_x, bar_y)], fill=pattern_color, width=bar_h)
             draw.ellipse([(fill_x - 3, bar_y - 3), (fill_x + 3, bar_y + 3)], fill=c_white)
 
         # Sub-status
-        pct_text = f"{int(progress * 100):02d}% COMPILED"
+        pct_text = f"{int(progress * 100):02d}% CYCLE COMPILED"
         draw.text((margin_x, bar_y + int(h * 0.015)), pct_text, font=self.font_small, fill=c_dim)
-        
-        rel_vel = min(0.96, 0.40 + 0.56 * (current_time / total_duration))
-        stats_text = f"v_orbit: {rel_vel:.2f}c  //  r_s: 2.95×10⁸ km"
+
+        stats_text = "f_min: 1.14 Hz  //  f_max: 2.79 Hz  //  RESONANCE: 100%"
         try:
             bbox_s = draw.textbbox((0, 0), stats_text, font=self.font_small)
             stats_w = bbox_s[2] - bbox_s[0]

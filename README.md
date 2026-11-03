@@ -17,7 +17,8 @@ Every episode is self-contained, lightweight, and comes equipped with:
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
 | **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Majestic Japanese Cherry Blossom Tree growing on a lush green meadow at evening dusk with setting sun, blurred city shadow silhouette, twilight stars, gentle breeze branch sway, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
-| **03** | [**Gargantua (Black Hole)**](03_black_hole_gargantua/) | General relativistic raymarching of a rotating Kerr black hole with gravitational lensing, dual-lobed accretion disk, Doppler beaming, Einstein ring, and astrophysics HUD. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🕳️ Completed |
+| **03** | [**Harmonic Pendulum Wave**](03_pendulum_wave/) | 24-sphere kinetic pendulum wave simulation with frequency dispersion, traveling sine waves, interlaced double-helixes, obsidian floor reflections, and coherent straight line realignment at $t=14.0\text{s}$. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ⏳ Completed |
+| **04** | [**Fibonacci Sunflower**]() | In Development — Sacred geometry floret distribution at the Golden Angle ($137.508^\circ$) blooming into radiant golden petals. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌻 Upcoming |
 
 ---
 
@@ -57,22 +58,22 @@ python generate_sakura_animation.py
 
 ---
 
-## 🕳️ Episode 03: Gargantua (Supermassive Kerr Black Hole)
+## ⏳ Episode 03: Harmonic Pendulum Wave (Kinetic Resonance)
 
 ### Quick Run (Full Screen):
 ```bash
-cd 03_black_hole_gargantua
-python generate_black_hole_animation.py
+cd 03_pendulum_wave
+python generate_pendulum_animation.py
 ```
-* **Full Laptop Screen:** Launches in full screen with real-time general relativistic geodesic raymarching.
+* **Full Laptop Screen:** Launches in full screen with 60 FPS real-time kinetic physics.
 * **Controls:**
-  * `Left Click + Drag`: Orbit camera around Gargantua in 3D
+  * `Left Click + Drag`: Orbit camera around the wave in 3D
   * `Right Click + Drag`: Pan camera target
-  * `Mouse Scroll`: Zoom in / out toward event horizon
+  * `Mouse Scroll`: Zoom in / out
   * `Space`: Pause / Resume animation
   * `H`: Toggle HUD Telemetry on / off (Pure Cinematic View)
   * `F` / `F11`: Toggle Fullscreen / Windowed
-  * `W`: Cycle Wireframe (Spacetime Grid) / Shaded / Cinematic Mix
+  * `W`: Cycle Wireframe / Photorealistic / Cinematic Mix
   * `R`: Reset animation & camera
   * `E`: Export direct 9:16 MP4 Reel video
 ---
