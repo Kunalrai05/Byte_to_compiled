@@ -18,7 +18,8 @@ Every episode is self-contained, lightweight, and comes equipped with:
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
 | **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Majestic Japanese Cherry Blossom Tree growing on a lush green meadow at evening dusk with setting sun, blurred city shadow silhouette, twilight stars, gentle breeze branch sway, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
 | **03** | [**Harmonic Pendulum Wave**](03_pendulum_wave/) | 24-sphere kinetic pendulum wave simulation with frequency dispersion, traveling sine waves, interlaced double-helixes, obsidian floor reflections, and coherent straight line realignment at $t=14.0\text{s}$. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ⏳ Completed |
-| **04** | [**Fibonacci Sunflower**]() | In Development — Sacred geometry floret distribution at the Golden Angle ($137.508^\circ$) blooming into radiant golden petals. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌻 Upcoming |
+| **04** | [**Porsche 911 GT3 RS (992)**](04_porsche_911_gt3rs/) | Aerodynamic active aero simulation with 60-year heritage morph (1974 930 Turbo), 1,600+ wind tunnel CFD streamlines, active DRS flap actuation, 9,000 RPM flat-6 redline, and Nürburgring telemetry HUD. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🏎️ Completed |
+| **05** | [**Fibonacci Sunflower**]() | In Development — Sacred geometry floret distribution at the Golden Angle ($137.508^\circ$) blooming into radiant golden petals. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌻 Upcoming |
 
 ---
 
