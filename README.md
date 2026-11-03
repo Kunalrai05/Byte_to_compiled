@@ -75,13 +75,4 @@ python generate_black_hole_animation.py
   * `W`: Cycle Wireframe (Spacetime Grid) / Shaded / Cinematic Mix
   * `R`: Reset animation & camera
   * `E`: Export direct 9:16 MP4 Reel video
-
 ---
-
-## 📜 The Viral Reel Formula
-
-Every episode is engineered around high-retention social media psychology:
-1. **The Hook (0:00–0:03):** Immediate emotional or visual trigger (*"You loved the Lily… so I coded cherry blossoms in Python."*).
-2. **The Progression (0:03–0:08):** Mesmerizing mathematical execution that builds tension.
-3. **The Dopamine Climax (0:08–0:14):** Full procedural bloom with glowing lighting and audio drop.
-4. **The Comment Driver:** High-debate captions prompting viewers to drop their favorite flower and share with friends.
