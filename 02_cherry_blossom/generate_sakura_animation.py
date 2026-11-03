@@ -259,9 +259,11 @@ class SakuraRenderer:
         """Render a single complete frame at time t."""
         self.ctx.clear(0.035, 0.045, 0.11, 1.0, depth=1.0)
 
-        # 1. Atmospheric Sky & Mount Fuji Background
+        # 1. Atmospheric Sky & Evening Skyline Background
         self.ctx.disable(moderngl.DEPTH_TEST)
         self.bg_prog['u_time'].value = float(t)
+        if 'u_resolution' in self.bg_prog:
+            self.bg_prog['u_resolution'].value = (float(self.width), float(self.height))
         self.bg_vao.render(moderngl.TRIANGLES)
         self.ctx.enable(moderngl.DEPTH_TEST)
 

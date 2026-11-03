@@ -71,7 +71,7 @@ class BotanicalHUD:
         top_y = int(h * 0.05)
 
         draw.text((margin_x, top_y), "PRUNUS SERRULATA // 桜の木", font=self.font_title, fill=c_white)
-        draw.text((margin_x, top_y + int(h * 0.038)), "ANCIENT BONSAI ARBOR // ZEN GARDEN & HANAFUBUKI", font=self.font_small, fill=c_dim)
+        draw.text((margin_x, top_y + int(h * 0.038)), "VERDANT MEADOW & TWILIGHT SKY // HANAFUBUKI (花吹雪)", font=self.font_small, fill=c_dim)
 
         # Technical tick marks across top
         line_y = top_y + int(h * 0.065)
@@ -85,7 +85,7 @@ class BotanicalHUD:
         # Top-right coordinates & telemetry
         phi = 42.1 + 3.5 * math.sin(current_time * 0.5)
         psi = -14.6 + 5.0 * math.cos(current_time * 0.4)
-        telemetry = f"ATMOSPHERE: DAWN [φ:{phi:+.1f}°]  //  WIND: 2.4 M/S"
+        telemetry = f"ATMOSPHERE: SUNSET DUSK [φ:{phi:+.1f}°]  //  STARS: VISIBLE  //  WIND: 2.4 M/S"
         telem_x = right_x - int(w * 0.28) if is_widescreen else int(w * 0.72)
         draw.text((telem_x, top_y + int(h * 0.012)), telemetry, font=self.font_small, fill=c_cyan_glow)
 

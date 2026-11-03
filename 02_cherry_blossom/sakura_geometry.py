@@ -263,113 +263,68 @@ def generate_falling_petal(model, base_pos, fall_speed, flutter_phase, scale, Nu
     mat = np.array([0.88, fall_speed, flutter_phase], dtype=np.float32)
     model.add_quad_grid(P_world, N, C, U, (V + 1.0) * 0.5, timing, mat)
 
-def generate_zen_island_and_pond(model, wire_t0, wire_t1, surf_t0, surf_t1):
+def generate_lush_grassy_ground(model, wire_t0, wire_t1, surf_t0, surf_t1, Nu=32, Nv=32):
     """
-    Generate an authentic Japanese Zen garden:
-    1. Mossy mound island where the tree roots anchor.
-    2. Surrounding tranquil reflecting water pond with gentle ripples.
-    3. Fallen petals resting on the moss and floating on the water (Hana-ikada).
+    Generate an expansive, verdant green grassy hill / meadow
+    that fills the entire ground perspective seamlessly with lush green grass.
     """
-    # 1. Mossy Island
-    Nu_m, Nv_m = 18, 24
-    u_m = np.linspace(0.0, 1.0, Nu_m, dtype=np.float32)
-    v_m = np.linspace(0.0, 2.0 * math.pi, Nv_m, endpoint=False, dtype=np.float32)
-    Um, Vm = np.meshgrid(u_m, v_m, indexing='ij')
+    u = np.linspace(-5.5, 5.5, Nu, dtype=np.float32)
+    v = np.linspace(-5.5, 5.5, Nv, dtype=np.float32)
+    U, V = np.meshgrid(u, v, indexing='ij')
 
-    P_m = np.zeros((Nu_m, Nv_m, 3), dtype=np.float32)
-    C_m = np.zeros((Nu_m, Nv_m, 3), dtype=np.float32)
+    P = np.zeros((Nu, Nv, 3), dtype=np.float32)
+    C = np.zeros((Nu, Nv, 3), dtype=np.float32)
 
-    c_moss_rich = np.array([0.16, 0.32, 0.12], dtype=np.float32)
-    c_moss_warm = np.array([0.22, 0.38, 0.16], dtype=np.float32)
-    c_stone_edge = np.array([0.20, 0.22, 0.24], dtype=np.float32)
+    # Rich Vibrant Green Grass Palette
+    c_grass_emerald = np.array([0.22, 0.58, 0.18], dtype=np.float32)
+    c_grass_lime    = np.array([0.36, 0.76, 0.26], dtype=np.float32)
+    c_grass_deep    = np.array([0.16, 0.44, 0.14], dtype=np.float32)
 
-    radius_m = 1.45
-    for i in range(Nu_m):
-        ui = u_m[i]
-        r = radius_m * ui
-        cos_val = max(0.0, math.cos(ui * 0.5 * math.pi))
-        h = -0.90 + 0.26 * (cos_val**1.6)
-        for j in range(Nv_m):
-            vj = v_m[j]
-            noise = 0.02 * math.sin(4.0 * vj + ui * 6.0)
-            P_m[i, j] = np.array([
-                (r + noise) * math.cos(vj),
-                h,
-                (r + noise) * math.sin(vj)
-            ], dtype=np.float32)
+    for i in range(Nu):
+        for j in range(Nv):
+            x = u[i]
+            z = v[j]
+            dist = math.sqrt(x * x + z * z)
+            
+            # Gentle hilltop where the tree is rooted
+            h_hill = 0.26 * math.exp(-pow(dist / 2.2, 2.0))
+            # Soft rolling meadow undulation
+            h_wave = 0.030 * math.sin(x * 1.2 + z * 0.9) + 0.015 * math.cos(x * 1.8 - z * 1.4)
+            y = -0.92 + h_hill + h_wave
+            
+            P[i, j] = np.array([x, y, z], dtype=np.float32)
+            
+            # Grass color variation
+            noise_val = 0.5 + 0.5 * math.sin(x * 6.0 + z * 5.0)
+            height_mix = smoothstep(-0.95, -0.65, y)
+            
+            grass_col = (1.0 - noise_val * 0.4) * c_grass_emerald + (noise_val * 0.4) * c_grass_lime
+            grass_col = (1.0 - height_mix * 0.25) * c_grass_deep + (height_mix * 0.25) * grass_col
+            C[i, j] = grass_col
 
-            if ui < 0.82:
-                moss_mix = (1.0 - ui * 0.5) + 0.1 * math.sin(3.0 * vj)
-                col = moss_mix * c_moss_warm + (1.0 - moss_mix) * c_moss_rich
-            else:
-                stone_fac = smoothstep(0.82, 1.0, ui)
-                col = (1.0 - stone_fac) * c_moss_rich + stone_fac * c_stone_edge
-            C_m[i, j] = col
+    N = compute_grid_normals(P)
+    timing = np.array([wire_t0, wire_t1, surf_t0, surf_t1], dtype=np.float32)
+    # Low SSS, low gloss for velvet grass
+    mat = np.array([0.04, 0.08, 4.0], dtype=np.float32)
+    model.add_quad_grid(P, N, C, (U + 5.5) / 11.0, (V + 5.5) / 11.0, timing, mat)
 
-    N_m = compute_grid_normals(P_m)
-    timing_m = np.array([wire_t0, wire_t1, surf_t0, surf_t1], dtype=np.float32)
-    mat_m = np.array([0.02, 0.05, 4.0], dtype=np.float32)
-    model.add_quad_grid(P_m, N_m, C_m, Um, Vm / (2.0 * math.pi), timing_m, mat_m)
-
-    # 2. Reflecting Water Pond
-    Nu_w, Nv_w = 16, 28
-    u_w = np.linspace(1.30, 4.8, Nu_w, dtype=np.float32)
-    v_w = np.linspace(0.0, 2.0 * math.pi, Nv_w, endpoint=False, dtype=np.float32)
-    Uw, Vw = np.meshgrid(u_w, v_w, indexing='ij')
-
-    P_w = np.zeros((Nu_w, Nv_w, 3), dtype=np.float32)
-    C_w = np.zeros((Nu_w, Nv_w, 3), dtype=np.float32)
-
-    c_water_deep = np.array([0.06, 0.12, 0.20], dtype=np.float32)
-    c_water_edge = np.array([0.10, 0.18, 0.26], dtype=np.float32)
-
-    for i in range(Nu_w):
-        rw = u_w[i]
-        for j in range(Nv_w):
-            vj = v_w[j]
-            ripple = 0.005 * math.sin(rw * 8.0 - vj * 3.0)
-            P_w[i, j] = np.array([
-                rw * math.cos(vj),
-                -0.905 + ripple,
-                rw * math.sin(vj)
-            ], dtype=np.float32)
-
-            fade = smoothstep(1.30, 3.5, rw)
-            C_w[i, j] = (1.0 - fade) * c_water_edge + fade * c_water_deep
-
-    N_w = compute_grid_normals(P_w)
-    timing_w = np.array([wire_t0, wire_t1, surf_t0, surf_t1], dtype=np.float32)
-    mat_w = np.array([0.00, 0.75, 48.0], dtype=np.float32)
-    model.add_quad_grid(P_w, N_w, C_w, (Uw - 1.30) / 3.5, Vw / (2.0 * math.pi), timing_w, mat_w)
-
-    # 3. Resting Petals on Moss Island and Floating on Pond Water
-    np.random.seed(77)
-    for _ in range(24):
-        rad = np.random.uniform(0.20, 1.15)
+    # Add scattered fallen cherry blossom petals resting peacefully in the green grass
+    np.random.seed(88)
+    for _ in range(54):
+        rad = np.random.uniform(0.20, 2.8)
         ang = np.random.uniform(0.0, 2.0 * math.pi)
         px = rad * math.cos(ang)
         pz = rad * math.sin(ang)
-        py = -0.90 + 0.26 * (max(0.0, math.cos(rad / 1.45 * 0.5 * math.pi))**1.6) + 0.006
+        py = -0.92 + 0.28 * math.exp(-pow(rad / 2.2, 2.0)) + 0.035 * math.sin(px * 1.2 + pz * 0.9) + 0.008
         pos = np.array([px, py, pz], dtype=np.float32)
         fl = np.random.uniform(0.0, 2.0 * math.pi)
-        sc = np.random.uniform(0.60, 0.90)
-        generate_falling_petal(model, pos, fall_speed=0.0, flutter_phase=fl, scale=sc)
-
-    for _ in range(20):
-        rad = np.random.uniform(1.35, 2.8)
-        ang = np.random.uniform(0.0, 2.0 * math.pi)
-        px = rad * math.cos(ang)
-        pz = rad * math.sin(ang)
-        py = -0.902
-        pos = np.array([px, py, pz], dtype=np.float32)
-        fl = np.random.uniform(0.0, 2.0 * math.pi)
-        sc = np.random.uniform(0.60, 0.85)
+        sc = np.random.uniform(0.60, 0.95)
         generate_falling_petal(model, pos, fall_speed=0.0, flutter_phase=fl, scale=sc)
 
 def generate_full_sakura_specimen():
     """
     Assemble the complete majestic Japanese Cherry Blossom Tree (Prunus Serrulata):
-    - Mossy Zen Island & surrounding reflecting water pond
+    - Verdant rolling green grassy hill meadow
     - Nebari root flare anchoring trunk to the earth
     - Ancient upright Moyogi bonsai trunk with furrowed aged bark
     - Sprawling natural boughs with arching-and-weeping s-curves
@@ -379,8 +334,8 @@ def generate_full_sakura_specimen():
     """
     model = SakuraModel()
 
-    # 1. Zen Island & Reflecting Pond
-    generate_zen_island_and_pond(model, wire_t0=0.0, wire_t1=2.0, surf_t0=0.4, surf_t1=2.8)
+    # 1. Lush Green Grassy Ground
+    generate_lush_grassy_ground(model, wire_t0=0.0, wire_t1=2.0, surf_t0=0.4, surf_t1=2.8)
 
     # 2. Nebari Root Anchors (4 curved roots anchoring the tree base)
     roots = [
