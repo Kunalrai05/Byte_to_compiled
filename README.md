@@ -17,7 +17,7 @@ Every episode is self-contained, lightweight, and comes equipped with:
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
 | **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Majestic Japanese Cherry Blossom Tree growing on a lush green meadow at evening dusk with setting sun, blurred city shadow silhouette, twilight stars, gentle breeze branch sway, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
-| **03** | [**Nokia 3310 Snake (100% AI)**](03_nokia_snake/) | Unbeatable Snake AI on an authentic retro green dot-matrix LCD Nokia screen using Hamiltonian cycles to fill 100% of the board. | `Pygame`, `NumPy`, `OpenCV` | 📱 Completed |
+| **03** | [**Coming Soon**]() | In Development — Aesthetic 3D POV Compilation Reel. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ⏳ In Progress |
 
 ---
 
