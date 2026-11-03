@@ -1,4 +1,4 @@
-# 📱 Episode 02: Nokia 3310 Snake (100% Hamiltonian AI)
+# 📱 Episode 03: Nokia 3310 Snake (100% Hamiltonian AI)
 
 > **The Childhood Myth Solved:** Did anyone in human history ever actually beat Snake on the Nokia 3310? We built an unbeatable autonomous AI using a mathematical **Hamiltonian Cycle with topological shortcuts** that fills **100% of the entire dot-matrix LCD screen** without ever crashing.
 

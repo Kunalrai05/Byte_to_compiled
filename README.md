@@ -1,8 +1,8 @@
-# ⚡ Byte to Compiled — Creative Coding & Nostalgic Reel Series
+# ⚡ Byte to Compiled — Creative Coding & Botanical Reel Series
 
 > *"What happens when imagination meets Python? Something beautiful gets compiled."*
 
-Welcome to **Byte to Compiled**, an open-source series of procedural simulations, nostalgic retro tech reconstructions, and creative coding algorithms engineered specifically for high-engagement, viral Instagram Reels, TikTok, and YouTube Shorts.
+Welcome to **Byte to Compiled**, an open-source series of procedural simulations, botanical compilations, and creative coding algorithms engineered specifically for high-engagement, viral Instagram Reels, TikTok, and YouTube Shorts.
 
 Every episode is self-contained, lightweight, and comes equipped with:
 - **Full-Screen Laptop Interactive Viewer** (60 FPS, keyboard/mouse controls)
@@ -16,7 +16,8 @@ Every episode is self-contained, lightweight, and comes equipped with:
 | # | Episode | Concept | Tech Stack | Status |
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
-| **02** | [**Nokia 3310 Snake (100% AI)**](02_nokia_snake/) | Unbeatable Snake AI on an authentic retro green dot-matrix LCD Nokia screen using Hamiltonian cycles to fill 100% of the board. | `Pygame`, `NumPy`, `OpenCV` | 🚀 Active |
+| **02** | [**Prunus Serrulata (Sakura)**](02_cherry_blossom/) | Japanese Cherry Blossom with gnarled bonsai wood, 5-notched petals, SSS translucency, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
+| **03** | [**Nokia 3310 Snake (100% AI)**](03_nokia_snake/) | Unbeatable Snake AI on an authentic retro green dot-matrix LCD Nokia screen using Hamiltonian cycles to fill 100% of the board. | `Pygame`, `NumPy`, `OpenCV` | 📱 Completed |
 
 ---
 
@@ -35,10 +36,30 @@ pip install moderngl moderngl-window pygame numpy opencv-python pillow scipy
 
 ---
 
+## 🌸 Episode 02: Prunus Serrulata (Sakura)
+
+### Quick Run (Full Screen):
+```bash
+cd 02_cherry_blossom
+python generate_sakura_animation.py
+```
+* **Full Laptop Screen:** Automatically launches in full screen to showcase the beauty of the procedural botanical model.
+* **Controls:**
+  * `Left Click + Drag`: Orbit in 3D
+  * `Right Click + Drag`: Pan camera
+  * `Mouse Scroll`: Zoom in / out
+  * `Space`: Pause / Resume animation
+  * `F` / `F11`: Toggle Fullscreen / Windowed
+  * `W`: Cycle Wireframe / Shaded / Cinematic Mix
+  * `R`: Reset animation
+  * `E`: Export direct 9:16 MP4 Reel video
+
+---
+
 ## 📜 The Viral Reel Formula
 
 Every episode is engineered around high-retention social media psychology:
-1. **The Hook (0:00–0:03):** Immediate emotional or visual trigger (*"Can Python beat Nokia Snake?"* / *"When imagination meets code"*).
+1. **The Hook (0:00–0:03):** Immediate emotional or visual trigger (*"You loved the Lily… so I coded cherry blossoms in Python."*).
 2. **The Progression (0:03–0:08):** Mesmerizing mathematical execution that builds tension.
-3. **The Dopamine Climax (0:08–0:14):** 100% completion or full visual reveal synced to audio drops.
-4. **The Comment Driver:** High-debate captions prompting viewers to drop their childhood memories, high scores, and share with friends.
+3. **The Dopamine Climax (0:08–0:14):** Full procedural bloom with glowing lighting and audio drop.
+4. **The Comment Driver:** High-debate captions prompting viewers to drop their favorite flower and share with friends.
