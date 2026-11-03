@@ -18,6 +18,8 @@ class BotanicalHUD:
     def _load_fonts(self):
         """Try loading clean system monospaced or sans-serif fonts."""
         font_names = [
+            "C:\\Windows\\Fonts\\YuGothM.ttc",
+            "C:\\Windows\\Fonts\\msgothic.ttc",
             "Consolas", "consolab.ttf", "consola.ttf",
             "Courier New", "cour.ttf", "Arial", "arial.ttf"
         ]
@@ -68,8 +70,8 @@ class BotanicalHUD:
         margin_x = int(w * 0.05) if is_widescreen else int(w * 0.08)
         top_y = int(h * 0.05)
 
-        draw.text((margin_x, top_y), "PRUNUS SERRULATA", font=self.font_title, fill=c_white)
-        draw.text((margin_x, top_y + int(h * 0.038)), "GENUS: PRUNUS  //  FAMILY: ROSACEAE (SAKURA)", font=self.font_small, fill=c_dim)
+        draw.text((margin_x, top_y), "PRUNUS SERRULATA // 桜の木", font=self.font_title, fill=c_white)
+        draw.text((margin_x, top_y + int(h * 0.038)), "ANCIENT BONSAI ARBOR // ZEN GARDEN & HANAFUBUKI", font=self.font_small, fill=c_dim)
 
         # Technical tick marks across top
         line_y = top_y + int(h * 0.065)
@@ -83,22 +85,22 @@ class BotanicalHUD:
         # Top-right coordinates & telemetry
         phi = 42.1 + 3.5 * math.sin(current_time * 0.5)
         psi = -14.6 + 5.0 * math.cos(current_time * 0.4)
-        telemetry = f"CAM [φ:{phi:+.1f}° ψ:{psi:+.1f}°]"
-        telem_x = right_x - int(w * 0.18) if is_widescreen else int(w * 0.65)
+        telemetry = f"ATMOSPHERE: DAWN [φ:{phi:+.1f}°]  //  WIND: 2.4 M/S"
+        telem_x = right_x - int(w * 0.28) if is_widescreen else int(w * 0.72)
         draw.text((telem_x, top_y + int(h * 0.012)), telemetry, font=self.font_small, fill=c_cyan_glow)
 
         # 2. Stage progression (Bottom HUD)
-        if current_time < 4.0:
+        if current_time < 3.8:
             stage_num = "STAGE 01"
-            stage_desc = "LIGNIFIED RAMIFICATION & PEDICELS"
+            stage_desc = "ANCIENT ARBOR & ROOT FORMATION"
             stage_color = (120, 255, 175, 240)
-        elif current_time < 8.0:
+        elif current_time < 7.8:
             stage_num = "STAGE 02"
-            stage_desc = "PENTAMEROUS COROLLA & STAMINAL CROWN"
+            stage_desc = "BOUGH UNFURLING & BUD INITIATION"
             stage_color = c_sakura_pink
         else:
             stage_num = "STAGE 03"
-            stage_desc = "PRUNUS SERRULATA // SAKURA BLOOM (FINAL)"
+            stage_desc = "FULL SAKURA BLOOM & HANAFUBUKI (花吹雪)"
             stage_color = (255, 225, 160, 240)
 
         bottom_y = int(h * 0.88)

@@ -16,7 +16,7 @@ Every episode is self-contained, lightweight, and comes equipped with:
 | # | Episode | Concept | Tech Stack | Status |
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
-| **02** | [**Prunus Serrulata (Sakura)**](02_cherry_blossom/) | Japanese Cherry Blossom with gnarled bonsai wood, 5-notched petals, SSS translucency, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
+| **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Majestic Japanese Cherry Blossom Tree growing in a peaceful Zen garden at dawn with Mount Fuji, reflecting pond, gentle breeze branch sway, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
 | **03** | [**Nokia 3310 Snake (100% AI)**](03_nokia_snake/) | Unbeatable Snake AI on an authentic retro green dot-matrix LCD Nokia screen using Hamiltonian cycles to fill 100% of the board. | `Pygame`, `NumPy`, `OpenCV` | 📱 Completed |
 
 ---
@@ -36,19 +36,20 @@ pip install moderngl moderngl-window pygame numpy opencv-python pillow scipy
 
 ---
 
-## 🌸 Episode 02: Prunus Serrulata (Sakura)
+## 🌸 Episode 02: Prunus Serrulata (Sakura Tree & Peaceful Zen Garden)
 
 ### Quick Run (Full Screen):
 ```bash
 cd 02_cherry_blossom
 python generate_sakura_animation.py
 ```
-* **Full Laptop Screen:** Automatically launches in full screen to showcase the beauty of the procedural botanical model.
+* **Full Laptop Screen:** Automatically launches in full screen to showcase the peaceful, serene blooming tree and drifting petals.
 * **Controls:**
   * `Left Click + Drag`: Orbit in 3D
   * `Right Click + Drag`: Pan camera
   * `Mouse Scroll`: Zoom in / out
   * `Space`: Pause / Resume animation
+  * `H`: Toggle HUD Telemetry on / off (Pure Zen View)
   * `F` / `F11`: Toggle Fullscreen / Windowed
   * `W`: Cycle Wireframe / Shaded / Cinematic Mix
   * `R`: Reset animation

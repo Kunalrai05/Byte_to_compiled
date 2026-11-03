@@ -1,9 +1,110 @@
 """
-GLSL Shaders for procedural Cherry Blossom (Prunus Serrulata) rendering.
-Includes paper-thin translucent petal Subsurface Scattering (SSS),
-gnarled wood Blinn-Phong lighting, falling petal kinematics, and barycentric wireframe glow.
+================================================================================
+  GLSL SHADERS — PRUNUS SERRULATA (CHERRY BLOSSOM TREE / 桜の木)
+  Includes:
+  - Atmospheric Japanese Twilight Dawn Sky, Mount Fuji, and Reflecting Pond
+  - Spring Breeze Branch Sway & Aerodynamic Petal Tumbling (Hanafubuki)
+  - Petal Subsurface Scattering (SSS) & Paper-Thin Translucency Wrap
+  - Barycentric Wireframe Glow with Seamless Photorealistic Transition
+  - Floating Bokeh Pollen/Firefly Particles
+================================================================================
 """
 
+# -----------------------------------------------------------------------------
+# 1. Background Atmospheric Environment Shader (Sky, Mount Fuji, Reflecting Pond)
+# -----------------------------------------------------------------------------
+BG_VERTEX_SHADER = """
+#version 330
+in vec2 in_position;
+in vec2 in_uv;
+out vec2 v_uv;
+
+void main() {
+    v_uv = in_uv;
+    gl_Position = vec4(in_position, 0.9999, 1.0);
+}
+"""
+
+BG_FRAGMENT_SHADER = """
+#version 330
+uniform float u_time;
+uniform vec2 u_resolution;
+in vec2 v_uv;
+out vec4 fragColor;
+
+void main() {
+    vec2 uv = v_uv;
+    
+    // 1. Serene Japanese Twilight-to-Dawn Sky Gradient
+    vec3 c_zenith = vec3(0.035, 0.045, 0.11);   // Deep twilight indigo
+    vec3 c_mid    = vec3(0.18, 0.14, 0.28);     // Soft twilight lavender
+    vec3 c_dawn   = vec3(0.55, 0.35, 0.44);     // Rosy peach
+    vec3 c_glow   = vec3(0.85, 0.68, 0.60);     // Warm golden dawn horizon
+
+    float y = uv.y;
+    vec3 sky;
+    if (y > 0.40) {
+        float f = (y - 0.40) / 0.60;
+        sky = mix(c_mid, c_zenith, pow(f, 0.85));
+    } else {
+        float f = y / 0.40;
+        sky = mix(c_glow, c_mid, pow(f, 0.7));
+    }
+
+    // 2. Wide, Majestic Mount Fuji Silhouette
+    float fuji_cx = 0.65;
+    float dx = abs(uv.x - fuji_cx);
+    // Authentic broad stratovolcano slope
+    float fuji_slope = exp(-pow(dx * 1.8, 1.45)) * 0.34;
+    // Flat caldera summit
+    float caldera = exp(-pow(dx * 22.0, 2.0)) * 0.014;
+    float fuji_base = 0.26;
+    float fuji_peak = fuji_base + max(0.0, fuji_slope - caldera);
+
+    if (uv.y < fuji_peak && uv.y >= fuji_base) {
+        float snow_line = fuji_base + fuji_slope * 0.58;
+        vec3 mountain_rock = vec3(0.18, 0.15, 0.26);
+        vec3 mountain_snow = vec3(0.92, 0.88, 0.96);
+        float snow_factor = smoothstep(snow_line, fuji_peak, uv.y);
+        vec3 mtn_col = mix(mountain_rock, mountain_snow, snow_factor);
+        
+        float haze = smoothstep(fuji_base, fuji_base + 0.12, uv.y);
+        sky = mix(sky, mtn_col, 0.68 * haze);
+    }
+
+    // 3. Calm Reflecting Water Pond at bottom
+    if (uv.y < 0.22) {
+        float water_depth = (0.22 - uv.y) / 0.22;
+        float ripple = sin(uv.x * 45.0 + u_time * 1.2) * 0.003 * (1.0 - water_depth);
+        float ref_y = 0.22 + (0.22 - uv.y) + ripple;
+        
+        vec3 water_tint = vec3(0.08, 0.14, 0.22);
+        vec3 ref_sky = mix(c_glow, c_mid, clamp(ref_y, 0.0, 1.0));
+        vec3 water = mix(ref_sky * 0.65, water_tint, water_depth * 0.55);
+
+        float shore_mist = exp(-pow((uv.y - 0.22) * 18.0, 2.0));
+        water = mix(water, vec3(0.75, 0.70, 0.80), shore_mist * 0.45);
+
+        sky = water;
+    }
+
+    // 4. Soft morning mist drift
+    float mist = sin(uv.x * 5.0 + u_time * 0.2) * 0.5 + 0.5;
+    mist *= exp(-pow((uv.y - 0.24) * 12.0, 2.0));
+    sky = mix(sky, vec3(0.82, 0.78, 0.88), mist * 0.25);
+
+    // Subtle soft vignette for calm atmosphere
+    vec2 vc = uv - vec2(0.5);
+    float vignette = 1.0 - dot(vc, vc) * 0.30;
+    sky *= vignette;
+
+    fragColor = vec4(sky, 1.0);
+}
+"""
+
+# -----------------------------------------------------------------------------
+# 2. Sakura Tree & Petal Vertex/Fragment Shaders
+# -----------------------------------------------------------------------------
 SAKURA_VERTEX_SHADER = """
 #version 330
 
@@ -44,26 +145,29 @@ void main() {
 
     vec3 pos = in_position;
     
-    // Hanafubuki: Tumbling falling petals drifting in spring breeze
-    if (in_timing.x >= 6.8) {
-        float fall_t = max(0.0, u_time - 6.8);
-        float fall_dist = mod(fall_t * (0.28 + in_mat.y * 0.2), 3.6) - 1.8;
+    // Dynamic falling petals kinematics (Hanafubuki)
+    // Only petals with active fall_speed (in_mat.y > 0.05) fall; resting ground petals stay put
+    if (in_timing.x >= 6.4 && in_mat.y > 0.05) {
+        float fall_t = max(0.0, u_time - 6.4);
+        float fall_dist = mod(fall_t * (0.24 + in_mat.y * 0.16), 3.2) - 1.6;
         pos.y -= fall_dist;
-        pos.x += sin(fall_t * 1.5 + in_mat.z) * 0.28 + fall_t * 0.04;
-        pos.z += cos(fall_t * 1.1 + in_mat.z) * 0.20;
+        pos.x += sin(fall_t * 1.35 + in_mat.z) * 0.32 + fall_t * 0.05;
+        pos.z += cos(fall_t * 1.10 + in_mat.z) * 0.22;
 
-        // Aerodynamic pitch & roll tumbling
-        float roll = fall_t * 2.8 + in_mat.z;
+        float roll = fall_t * 2.4 + in_mat.z;
         float cr = cos(roll);
         float sr = sin(roll);
         vec3 p_rot = pos;
         p_rot.x = pos.x * cr - pos.y * sr * 0.2;
         p_rot.y = pos.x * sr * 0.2 + pos.y;
         pos = p_rot;
-    } else if (u_time > 8.0) {
-        // Gentle tree sway
-        float wind = sin(u_time * 1.8 + pos.x * 2.0 + pos.y * 1.5) * 0.012;
-        pos.x += wind * smoothstep(0.0, 1.0, pos.y);
+    } else {
+        // Peaceful spring breeze swaying the tree branches
+        float wind_phase = u_time * 1.35 + pos.x * 0.8 + pos.z * 0.6;
+        float wind_sway = (sin(wind_phase) * 0.028 + sin(wind_phase * 2.1) * 0.010);
+        float sway_h = smoothstep(-0.6, 1.4, pos.y);
+        pos.x += wind_sway * sway_h;
+        pos.z += wind_sway * 0.45 * sway_h;
     }
 
     vec4 world_pos = m_model * vec4(pos, 1.0);
@@ -125,17 +229,18 @@ void main() {
     wire_color = mix(wire_color, vec3(1.0, 1.0, 1.0), is_edge * is_edge * 0.4);
 
     // 2. Dual-Source Lighting + Subsurface Scattering (SSS)
-    // Subtle organic petal vein micro-texture using UV coordinates
-    float vein = sin(v_uv.y * 42.0) * 0.025 * smoothstep(0.1, 0.7, v_uv.x);
+    float vein = sin(v_uv.y * 36.0) * 0.02 * smoothstep(0.1, 0.7, v_uv.x);
     vec3 base_color = v_color + vec3(vein);
 
-    vec3 light_dir1 = normalize(vec3(0.5, 1.0, 0.75));
-    vec3 light_col1 = vec3(0.95, 0.90, 0.86) * 0.85; // Soft warm sunlight
+    // Warm golden dawn sunlight from the right
+    vec3 light_dir1 = normalize(vec3(0.65, 0.75, 0.55));
+    vec3 light_col1 = vec3(1.0, 0.92, 0.85) * 0.88;
 
-    vec3 light_dir2 = normalize(vec3(-0.7, -0.3, -0.5));
-    vec3 light_col2 = vec3(0.30, 0.50, 0.75) * 0.50; // Cool sky rim
+    // Cool skylight fill from top-left
+    vec3 light_dir2 = normalize(vec3(-0.55, 0.85, -0.40));
+    vec3 light_col2 = vec3(0.35, 0.48, 0.72) * 0.45;
 
-    vec3 ambient = vec3(0.12, 0.12, 0.15) * base_color;
+    vec3 ambient = vec3(0.14, 0.13, 0.18) * base_color;
 
     // Half-Lambert diffuse wrap for paper-thin floral translucency
     float NdotL1 = dot(N, light_dir1);
@@ -143,25 +248,26 @@ void main() {
     float NdotL2 = max(0.0, dot(N, light_dir2));
     vec3 diffuse = (wrap1 * light_col1 + NdotL2 * light_col2 * 0.5) * base_color;
 
-    // Specular highlight (moist delicate petal gloss)
+    // Specular highlight
     vec3 H1 = normalize(light_dir1 + V);
     float NdotH1 = max(0.0, dot(N, H1));
     float spec1 = pow(NdotH1, v_mat.z) * v_mat.y;
     vec3 specular = spec1 * vec3(1.0, 0.96, 0.92);
 
-    // Subsurface Scattering (SSS): Light passing through delicate petal tissue
-    float sss_factor = v_mat.x;
-    float back_scatter = pow(max(0.0, dot(-light_dir1, V)), 2.0) * sss_factor;
-    vec3 sss_color = base_color * vec3(1.35, 0.40, 0.65) * back_scatter * 0.95;
+    // Subsurface Scattering (SSS) & Fresnel rim ONLY for delicate floral petals
+    float is_petal = step(0.35, v_color.r);
 
-    // Soft Fresnel rim glow
-    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 3.0);
+    float sss_factor = v_mat.x * is_petal;
+    float back_scatter = pow(max(0.0, dot(-light_dir1, V)), 2.0) * sss_factor;
+    vec3 sss_color = base_color * vec3(1.35, 0.40, 0.65) * back_scatter * 0.92;
+
+    // Soft Fresnel rim glow (only on petals)
+    float fresnel = pow(1.0 - max(0.0, dot(N, V)), 3.0) * is_petal;
     vec3 rim = fresnel * vec3(0.95, 0.85, 1.0) * 0.35;
 
     vec3 shaded_surface = ambient + diffuse + specular + sss_color + rim;
 
-    // 3. Composition & Stage Materialization
-    float wire_glow = is_edge * v_wire_alpha;
+    // 3. Composition: Clean cross-fade so Stage 3 is 100% smooth photorealistic!
     vec3 final_rgb;
 
     if (u_wireframe_mode == 1) {
@@ -170,20 +276,22 @@ void main() {
     } else if (u_wireframe_mode == 2) {
         final_rgb = shaded_surface;
     } else {
-        vec3 wire_layer = wire_color * wire_glow * 1.4;
+        // Hybrid mix: Wireframe fades completely away as surface alpha reaches 1.0
+        float wire_fade = (1.0 - smoothstep(0.0, 0.85, v_surf_alpha));
+        float wire_glow = is_edge * v_wire_alpha * wire_fade;
+        vec3 wire_layer = wire_color * wire_glow * 1.5;
         vec3 surface_layer = shaded_surface * v_surf_alpha;
         
-        // Hide tech wireframe on wood branch in Stage 3, keep subtle glow on petals
-        float is_petal = step(0.35, v_color.r);
-        float tech_wire = is_edge * (is_petal * 0.12) * (1.0 - v_surf_alpha * 0.85);
-
-        final_rgb = surface_layer + wire_layer * (1.0 - v_surf_alpha * 0.88) + wire_color * tech_wire;
+        final_rgb = surface_layer + wire_layer;
     }
 
     fragColor = vec4(final_rgb, max(v_wire_alpha, v_surf_alpha));
 }
 """
 
+# -----------------------------------------------------------------------------
+# 3. Floating Pollen Bokeh / Firefly Shaders
+# -----------------------------------------------------------------------------
 PARTICLE_VERTEX_SHADER = """
 #version 330
 
@@ -204,15 +312,15 @@ void main() {
     
     // Drifting motion in spring breeze
     float t = u_time * in_speed + in_phase;
-    pos.x += sin(t * 0.7) * 0.22;
-    pos.y += mod(u_time * 0.09 * in_speed + in_phase * 0.3, 3.2) - 1.6;
-    pos.z += cos(t * 0.6) * 0.22;
+    pos.x += sin(t * 0.7) * 0.25;
+    pos.y += mod(u_time * 0.08 * in_speed + in_phase * 0.3, 3.4) - 1.7;
+    pos.z += cos(t * 0.6) * 0.25;
 
     vec4 view_pos = m_view * m_model * vec4(pos, 1.0);
     gl_Position = m_proj * view_pos;
 
     float dist = length(view_pos.xyz);
-    gl_PointSize = clamp((in_radius * 850.0) / max(0.5, dist), 2.0, 45.0);
+    gl_PointSize = clamp((in_radius * 900.0) / max(0.5, dist), 2.0, 48.0);
 
     v_alpha = 0.5 + 0.5 * sin(t * 1.4);
 }
@@ -240,6 +348,9 @@ void main() {
 }
 """
 
+# -----------------------------------------------------------------------------
+# 4. HUD Screen Quad Shaders
+# -----------------------------------------------------------------------------
 HUD_VERTEX_SHADER = """
 #version 330
 
