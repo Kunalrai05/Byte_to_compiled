@@ -17,7 +17,7 @@ Every episode is self-contained and comes equipped with:
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cubic Bézier spines, Bishop parallel transport frames, organic subsurface scattering (SSS), and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Available |
 | **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Japanese Cherry Blossom Tree growing on a green meadow at evening dusk with Moyogi bonsai splines, setting sun, twilight stars, branch sway, and falling petals (*Hanafubuki*). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Available |
-| **03** | [**Diamond Engagement Ring**](03_diamond_ring/) | 3D Solitaire Diamond Ring rendered via software Z-buffering and ASCII character shading with optical starburst glints, paired with an authentic VS Code dark editor canvas in a split-screen layout. | `NumPy`, `Pillow`, `OpenCV`, `Pygame` | 💎 Available |
+| **03** | [**Diamond Engagement Ring**](03_diamond_ring/) | Procedural 3D Solitaire Diamond Ring with bottom-to-top materialization, concentric hollow halo shockwave burst, chromatic dispersion ($n=2.42$), and continuous 3D orbit on an obsidian studio floor. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 💍 Available |
 
 ---
 
@@ -36,23 +36,25 @@ pip install moderngl moderngl-window pygame numpy opencv-python pillow scipy
 
 ---
 
-## 💎 Episode 03: 3D Diamond Ring // ASCII Generative Art
+## 💍 Episode 03: 3D Diamond Engagement Ring // Materialization & Concentric Halo
 
-### Quick Run:
+### Full Laptop Screen Interactive Run:
 ```bash
 cd 03_diamond_ring
-python generate_diamond_reel.py
+python generate_diamond_ring.py
 ```
 * **Interactive Controls:**
-  * `Spacebar`: Pause / Resume 3D rotation
-  * `Left` / `Right` Arrow: Manually rotate ring
+  * `Spacebar`: Pause / Resume animation
+  * `R`: Replay materialization & halo shockwave
+  * `Left Click + Drag`: Orbit 3D camera
+  * `Mouse Scroll`: Dynamic camera zoom
   * `F` / `F11`: Toggle Fullscreen / Windowed
-  * `E`: Export direct 9:16 MP4 video
+  * `E`: Export direct 9:16 vertical MP4 video
   * `ESC` / `Q`: Quit
 
 ### Headless Video Export:
 ```bash
-python generate_diamond_reel.py --export
+python generate_diamond_ring.py --export
 ```
 
 ---
