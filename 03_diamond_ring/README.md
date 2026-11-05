@@ -7,19 +7,19 @@
 ## 🎯 Visual Progression & Pipeline
 
 ```
-[0.0s – 4.0s]                  [4.0s – 5.5s]                        [5.2s – End]
+[0.0s – 6.6s]                  [6.6s – 9.2s]                        [8.6s – End]
 Progressive Materialization  -> Concentric Hollow Shockwave -> 3D Continuous Orbit
 (Bottom-to-Top Binary Sweep)    (Center to Screen Edges Burst)   (Facet Glints Across Code)
 ```
 
-1. **Phase 1: Bottom-to-Top Procedural Generation ($0.0\text{s} \to 4.0\text{s}$)**
-   - The platinum band materializes upward from the ground plane with an electrifying machine-code binary flicker frontier (`0` and `1` cycling at 18 Hz).
+1. **Phase 1: Bottom-to-Top Procedural Generation ($0.0\text{s} \to 6.6\text{s}$)**
+   - The platinum band materializes upward from the ground plane with an electrifying machine-code binary flicker frontier (`0` and `1` cycling at 11 Hz).
    - Four secure radial prongs curve upward around the crown.
    - The 57-facet brilliant-cut diamond crystallizes at the crown, rendered in crystalline code symbols (`@`, `#`, `gem`, `1111`, `{}`, `[]`, `<>`).
-2. **Phase 2: Concentric Hollow Halo Shockwave Burst ($4.0\text{s} \to 5.5\text{s}$)**
+2. **Phase 2: Concentric Hollow Halo Shockwave Burst ($6.6\text{s} \to 9.2\text{s}$)**
    - The instant generation completes, a multi-ring concentric hollow circle shockwave ignites from the center $(0.50, 0.52)$.
    - Sweeps outward across the entire screen all the way to the screen boundaries, illuminating the matrix grid in radiant white ripples.
-3. **Phase 3: Continuous 3D Orbit ($5.2\text{s}+$ onwards)**
+3. **Phase 3: Continuous 3D Orbit ($8.6\text{s}+$ onwards)**
    - The ring initiates smooth 3D rotation with 3D normals and Blinn-Phong specular glints traveling dynamically across the coded typography.
 
 ---
@@ -44,6 +44,7 @@ python generate_diamond_ring.py --windowed
 | :--- | :--- |
 | **`Spacebar`** | Pause / Resume animation timeline |
 | **`R`** | Replay simulation from $t = 0.0\text{s}$ (watch materialization & shockwave burst again) |
+| **`[` / `]`** | Slow down / speed up playback speed in real-time |
 | **`M`** | Cycle visual mode: `0` (Coded Words + Binary) $\to$ `1` (Pure Binary `0`/`1`) $\to$ `2` (ASCII Density Ramp) |
 | **`B`** | Toggle background subtle ambient digital rain ON / OFF (pure `#000000` void) |
 | **`1` / `2` / `3`** | Adjust cell size: `1` (Fine 7x10) \| `2` (Medium 9x13) \| `3` (Large 12x17) |

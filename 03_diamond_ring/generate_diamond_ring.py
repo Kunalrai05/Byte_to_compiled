@@ -47,20 +47,21 @@ class DiamondRingEngine:
         self.height = height
         self.fullscreen = fullscreen
         self.is_headless = is_headless
-        self.total_duration = 14.0
+        self.total_duration = 20.0
 
-        # Animation Timeline:
-        # 0.0s to 4.0s: Bottom-to-top materialization
-        # 4.0s to 5.5s: Concentric hollow halo shockwave burst
-        # 5.2s+: 3D continuous rotation
-        self.growth_duration = 4.0
-        self.shockwave_start = 4.0
-        self.shockwave_duration = 1.5
-        self.rotation_start = 5.2
+        # Animation Timeline (0.6x Slower, Majestic Cinematic Pace):
+        # 0.0s to 6.6s: Bottom-to-top progressive materialization
+        # 6.6s to 9.2s: Concentric hollow halo shockwave burst
+        # 8.6s+: 3D continuous rotation
+        self.growth_duration = 6.6
+        self.shockwave_start = 6.6
+        self.shockwave_duration = 2.6
+        self.rotation_start = 8.6
 
         # State
         self.is_paused = False
         self.sim_time = 0.0
+        self.playback_speed = 1.0
 
         # Visual Modes
         # 0: Coded Words & Binary (Default)
@@ -219,7 +220,7 @@ class DiamondRingEngine:
         auto_yaw = 0.0
         if t > self.rotation_start:
             dt_rot = t - self.rotation_start
-            auto_yaw = dt_rot * 0.72 # Smooth rotation speed
+            auto_yaw = dt_rot * 0.43 # Smooth, graceful 0.6x rotation speed
 
         total_yaw = auto_yaw + math.radians(self.cam_yaw)
         pitch_rad = math.radians(self.cam_pitch)
@@ -232,15 +233,15 @@ class DiamondRingEngine:
         view = look_at_matrix(eye, self.cam_target)
         model = identity_matrix()
 
-        # Growth Progress: 0.0 to 1.0 over growth_duration
+        # Growth Progress: 0.0 to 1.0 over growth_duration (6.6s)
         if t <= self.growth_duration:
             growth_pct = smoothstep(0.1, self.growth_duration, t)
         else:
             growth_pct = 1.0
 
-        # Completion Flash
-        if 4.0 <= t <= 4.7:
-            flash_intensity = math.exp(-(t - 4.0) * 6.0)
+        # Completion Flash at shockwave trigger
+        if self.shockwave_start <= t <= (self.shockwave_start + 1.2):
+            flash_intensity = math.exp(-(t - self.shockwave_start) * 3.6)
         else:
             flash_intensity = 0.0
 
@@ -313,6 +314,7 @@ class DiamondRingEngine:
         print("  * 'M' Key     : Cycle Mode (0: Coded+Binary, 1: Pure Binary, 2: ASCII)")
         print("  * 'B' Key     : Toggle Background subtle digital rain")
         print("  * '1','2','3' : Change Cell Size (Fine, Medium, Large)")
+        print("  * '[', ']'    : Slow down / Speed up timeline playback")
         print("  * Mouse Drag  : Free 3D camera orbit")
         print("  * Mouse Scroll: Zoom in / out")
         print("  * 'F' / 'F11' : Toggle Fullscreen / Windowed")
@@ -328,7 +330,7 @@ class DiamondRingEngine:
             t_prev = t_curr
 
             if not self.is_paused:
-                self.sim_time += dt
+                self.sim_time += dt * self.playback_speed
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -343,6 +345,12 @@ class DiamondRingEngine:
                     elif event.key == pygame.K_r:
                         self.sim_time = 0.0
                         print("[*] Replaying Coded Ring Generation...")
+                    elif event.key == pygame.K_LEFTBRACKET:
+                        self.playback_speed = max(0.2, self.playback_speed - 0.1)
+                        print(f"[*] Playback Speed: {self.playback_speed:.1f}x")
+                    elif event.key == pygame.K_RIGHTBRACKET:
+                        self.playback_speed = min(3.0, self.playback_speed + 0.1)
+                        print(f"[*] Playback Speed: {self.playback_speed:.1f}x")
                     elif event.key == pygame.K_m:
                         self.mode = (self.mode + 1) % 3
                         modes = ["Coded Words & Binary Matrix", "Pure Binary Matrix ('0' & '1')", "Classic ASCII Density Ramp"]

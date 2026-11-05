@@ -256,7 +256,7 @@ void main() {
         // Cell is active!
         if (frontier_glow > 0.1) {
             // High-speed machine code binary flicker at materialization frontier
-            float fast_tick = fract(u_time * 18.0 + cell_rnd);
+            float fast_tick = fract(u_time * 11.0 + cell_rnd);
             glyph_idx = (fast_tick > 0.5) ? 17 : 16; // '1' or '0'
             total_lum = clamp(total_lum + 0.5, 0.0, 1.6);
         }

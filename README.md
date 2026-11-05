@@ -46,6 +46,7 @@ python generate_diamond_ring.py
 * **Interactive Controls:**
   * `Spacebar`: Pause / Resume animation
   * `R`: Replay materialization & halo shockwave
+  * `[` / `]`: Slow down / speed up playback speed in real-time
   * `M`: Cycle mode (0: Coded Words + Binary, 1: Pure Binary `0`/`1`, 2: ASCII Density Ramp)
   * `B`: Toggle subtle background digital rain ON / OFF
   * `1` / `2` / `3`: Change cell size (Fine, Medium, Large)
