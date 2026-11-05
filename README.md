@@ -17,7 +17,7 @@ Every episode is self-contained and comes equipped with:
 |:---:|:---|:---|:---:|:---:|
 | **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cubic Bézier spines, Bishop parallel transport frames, organic subsurface scattering (SSS), and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Available |
 | **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Japanese Cherry Blossom Tree growing on a green meadow at evening dusk with Moyogi bonsai splines, setting sun, twilight stars, branch sway, and falling petals (*Hanafubuki*). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Available |
-| **03** | [**Diamond Engagement Ring**](03_diamond_ring/) | Procedural 3D Solitaire Diamond Ring with bottom-to-top materialization, concentric hollow halo shockwave burst, chromatic dispersion ($n=2.42$), and continuous 3D orbit on an obsidian studio floor. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 💍 Available |
+| **03** | [**Diamond Engagement Ring**](03_diamond_ring/) | 3D Solitaire Diamond Ring rendered as a monochrome Black & White matrix of pixelated binary digits (`0`, `1`) and coded keywords (`def`, `vec`, `gem`, `void`, `{}`) with bottom-to-top materialization, concentric halo shockwave burst, and continuous 3D rotation. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 💍 Available |
 
 ---
 
@@ -36,7 +36,7 @@ pip install moderngl moderngl-window pygame numpy opencv-python pillow scipy
 
 ---
 
-## 💍 Episode 03: 3D Diamond Engagement Ring // Materialization & Concentric Halo
+## 💍 Episode 03: 3D Diamond Engagement Ring // Monochrome Coded & Binary Matrix
 
 ### Full Laptop Screen Interactive Run:
 ```bash
@@ -46,6 +46,9 @@ python generate_diamond_ring.py
 * **Interactive Controls:**
   * `Spacebar`: Pause / Resume animation
   * `R`: Replay materialization & halo shockwave
+  * `M`: Cycle mode (0: Coded Words + Binary, 1: Pure Binary `0`/`1`, 2: ASCII Density Ramp)
+  * `B`: Toggle subtle background digital rain ON / OFF
+  * `1` / `2` / `3`: Change cell size (Fine, Medium, Large)
   * `Left Click + Drag`: Orbit 3D camera
   * `Mouse Scroll`: Dynamic camera zoom
   * `F` / `F11`: Toggle Fullscreen / Windowed

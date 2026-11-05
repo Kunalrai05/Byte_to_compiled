@@ -1,13 +1,20 @@
 """
-ModernGL Shaders for the 3D Diamond Ring Simulation.
+GLSL Shaders for the Monochrome Coded & Binary Diamond Ring Simulation.
+Episode 03: Byte to Compiled.
+
 Includes:
-1. Ring Materialization & PBR Shader: Bottom-to-top growth clipping, crystalline spark frontier,
-   metallic platinum reflection, and chromatic diamond dispersion with facet glints.
-2. Concentric Hollow Halo Shockwave Shader: Radiant circular shockwave burst expanding from center to all edges.
-3. Studio Environment Shader: Soft overhead spotlight, floor reflections, and floating bokeh sparkles.
+1. RING_VERT_SRC & RING_FRAG_SRC (Pass 1):
+   Renders 3D parametric ring band, 4 prongs, and brilliant-cut diamond to an offscreen FBO.
+   Outputs [Luminance, Growth Coordinate, Material ID, Visibility].
+2. CODED_VERT_SRC & CODED_FRAG_SRC (Pass 2):
+   Rasterizes the 3D scene into a dense monochrome Black & White matrix grid of
+   pixelated binary digits ('0', '1') and coded keywords ('def', 'vec', 'gem', 'void', '{}', '<>').
+   Implements bottom-to-top growth ignition, concentric halo shockwave ripples, and 3D facet glints.
 """
 
-# --- 1. RING & DIAMOND PBR SHADER ---
+# =============================================================================
+# PASS 1: 3D PARAMETRIC RING RENDER TO OFFSCREEN FBO
+# =============================================================================
 RING_VERT_SRC = """
 #version 330 core
 
@@ -57,9 +64,9 @@ in float v_growth;
 in vec3 v_mat;
 
 uniform vec3 u_cam_pos;
-uniform float u_growth;       // 0.0 to 1.0 (materialization frontier)
+uniform float u_growth; // 0.0 to 1.0 (materialization frontier)
 uniform float u_time;
-uniform float u_flash;        // Completion starburst flash intensity
+uniform float u_flash;
 
 out vec4 frag_color;
 
@@ -68,18 +75,18 @@ void main() {
     float roughness = v_mat.y;
     float metallic  = v_mat.z;
 
-    // --- BOTTOM-TO-TOP GROWTH CLIPPING ---
-    // Floor (mat_id == 2.0) is always visible; ring & gem materialize progressively
-    if (mat_id < 1.5) {
-        if (v_growth > u_growth) {
-            discard; // Not yet materialized
-        }
+    // Discard floor geometry if any, and discard unmaterialized ring fragments
+    if (mat_id > 1.5) {
+        discard;
+    }
+    if (v_growth > u_growth) {
+        discard;
     }
 
     vec3 N = normalize(v_normal);
     vec3 V = normalize(u_cam_pos - v_world_pos);
 
-    // Three-point Studio Lighting (Key, Rim, Overhead Softbox)
+    // Studio Lighting setup
     vec3 L_key = normalize(vec3(1.8, 3.2, 2.4) - v_world_pos);
     vec3 L_fill = normalize(vec3(-2.2, 1.8, 1.5) - v_world_pos);
     vec3 L_top  = normalize(vec3(0.0, 4.5, 0.0) - v_world_pos);
@@ -88,97 +95,50 @@ void main() {
     vec3 H_top = normalize(L_top + V);
 
     float NdotV = max(dot(N, V), 0.0);
-    float fresnel = pow(1.0 - NdotV, 3.5);
+    float fresnel = pow(1.0 - NdotV, 3.0);
 
-    vec3 final_rgb = vec3(0.0);
+    float lum = 0.0;
 
-    // =========================================================================
-    // MATERIAL 0: PLATINUM / WHITE GOLD RING BAND & PRONGS
-    // =========================================================================
     if (mat_id < 0.5) {
-        vec3 base_col = v_color;
-        
-        // Micro-surface metallic sheen using UV
+        // Platinum Band & Prongs: Sharp metallic specular highlights and diffuse
+        float diff_key = max(dot(N, L_key), 0.0) * 0.65;
+        float diff_fill = max(dot(N, L_fill), 0.0) * 0.30;
+        float diff_top  = max(dot(N, L_top),  0.0) * 0.45;
+
+        float spec_sharp = pow(max(dot(N, H_key), 0.0), 48.0) * 1.50
+                         + pow(max(dot(N, H_top), 0.0), 64.0) * 1.80;
+        float rim = fresnel * 0.70;
+
+        lum = 0.15 + (diff_key + diff_fill + diff_top) * 0.55 + spec_sharp + rim;
         float micro = sin(v_uv.x * 64.0) * cos(v_uv.y * 64.0) * 0.02;
-        base_col += vec3(micro);
+        lum += micro;
+    } else {
+        // Brilliant-cut Diamond Gemstone: High refractive index facet dispersion
+        float diff_key = max(dot(N, L_key), 0.0) * 0.50;
+        float spec_facet = pow(max(dot(N, H_key), 0.0), 96.0) * 2.80
+                         + pow(max(dot(N, H_top), 0.0), 128.0) * 3.20;
+        float facet_rim = pow(1.0 - NdotV, 2.0) * 1.10;
 
-        float diff_key = max(dot(N, L_key), 0.0) * 0.70;
-        float diff_fill = max(dot(N, L_fill), 0.0) * 0.35;
-        float diff_top  = max(dot(N, L_top),  0.0) * 0.50;
+        lum = 0.30 + diff_key * 0.40 + spec_facet + facet_rim;
 
-        float spec_sharp = pow(max(dot(N, H_key), 0.0), 64.0) * 1.40
-                         + pow(max(dot(N, H_top), 0.0), 96.0) * 1.80;
-        float spec_soft  = pow(max(dot(N, H_key), 0.0), 16.0) * 0.35;
-
-        vec3 ambient = vec3(0.12, 0.14, 0.18) * base_col;
-        vec3 diffuse = (diff_key + diff_fill + diff_top) * base_col;
-        vec3 specular = vec3(1.0) * spec_sharp + base_col * spec_soft * metallic;
-        vec3 rim = vec3(0.7, 0.85, 1.0) * fresnel * 0.75;
-
-        final_rgb = ambient + diffuse + specular + rim;
-    }
-
-    // =========================================================================
-    // MATERIAL 1: BRILLIANT-CUT DIAMOND GEMSTONE (CHROMATIC DISPERSION & GLINTS)
-    // =========================================================================
-    else if (mat_id < 1.5) {
-        // High refractive index (n = 2.42) with prismatic chromatic dispersion
-        vec3 R_red   = refract(-V, N, 1.0 / 2.40);
-        vec3 R_green = refract(-V, N, 1.0 / 2.42);
-        vec3 R_blue  = refract(-V, N, 1.0 / 2.44);
-
-        float fire_r = pow(max(dot(R_red, L_key), 0.0), 8.0) * 0.75;
-        float fire_g = pow(max(dot(R_green, L_key), 0.0), 8.0) * 0.75;
-        float fire_b = pow(max(dot(R_blue, L_key), 0.0), 8.0) * 0.95;
-        vec3 fire = vec3(fire_r, fire_g, fire_b);
-
-        // Extreme facet specular glints
-        float spec_glint = pow(max(dot(N, H_key), 0.0), 128.0) * 3.5
-                         + pow(max(dot(N, H_top), 0.0), 96.0) * 2.8;
-
-        // Facet edge highlights
-        float facet_rim = pow(1.0 - NdotV, 2.0) * 0.95;
-
-        vec3 diamond_body = v_color * 0.30;
-        final_rgb = diamond_body + fire + vec3(spec_glint) + vec3(0.6, 0.85, 1.0) * facet_rim;
-
-        // Completion flash bloom
         if (u_flash > 0.01) {
-            final_rgb += vec3(1.2, 1.4, 1.8) * u_flash * 2.5;
+            lum += u_flash * 2.5;
         }
     }
 
-    // =========================================================================
-    // MATERIAL 2: STUDIO FLOOR PLATFORM & SOFT SHADOW
-    // =========================================================================
-    else {
-        float r = length(v_world_pos.xz);
-        float floor_falloff = smoothstep(4.2, 1.0, r);
-        float shadow = smoothstep(0.0, 1.2, length(v_world_pos.xz));
+    // Ensure v_color contributes to output so GLSL attribute is preserved
+    float color_weight = dot(v_color, vec3(0.299, 0.587, 0.114));
+    lum = lum * max(0.5, color_weight);
 
-        vec3 floor_base = vec3(0.04, 0.045, 0.055) * floor_falloff;
-        float floor_spec = pow(max(dot(N, H_top), 0.0), 32.0) * 0.25 * floor_falloff;
-
-        final_rgb = floor_base * (0.4 + 0.6 * shadow) + vec3(floor_spec);
-    }
-
-    // --- LUMINOUS GROWTH FRONTIER SPARK EDGE ---
-    if (mat_id < 1.5 && u_growth < 0.999) {
-        float dist_to_frontier = u_growth - v_growth;
-        if (dist_to_frontier >= 0.0 && dist_to_frontier < 0.035) {
-            float frontier_glow = (1.0 - dist_to_frontier / 0.035);
-            // Brilliant crystalline spark rim
-            vec3 spark_col = vec3(0.4, 0.9, 1.2) * 4.0;
-            final_rgb += spark_col * frontier_glow;
-        }
-    }
-
-    frag_color = vec4(final_rgb, 1.0);
+    // Output: [Luminance, Growth Coordinate, Material ID, Visibility]
+    frag_color = vec4(clamp(lum, 0.0, 2.5), v_growth, mat_id, 1.0);
 }
 """
 
-# --- 2. CONCENTRIC HOLLOW HALO SHOCKWAVE POST-PROCESS SHADER ---
-SHOCKWAVE_VERT_SRC = """
+# =============================================================================
+# PASS 2: FULLSCREEN BLACK & WHITE CODED & BINARY MATRIX SHADER
+# =============================================================================
+CODED_VERT_SRC = """
 #version 330 core
 
 layout (location = 0) in vec2 in_pos;
@@ -190,107 +150,172 @@ void main() {
 }
 """
 
-SHOCKWAVE_FRAG_SRC = """
+CODED_FRAG_SRC = """
 #version 330 core
 
 in vec2 v_uv;
 
-uniform vec2 u_center;          // Screen center in UV space (0.5, 0.5)
-uniform float u_aspect;         // Width / Height
-uniform float u_shock_radius;   // Current expanding radius (0.0 to 2.2)
-uniform float u_shock_alpha;    // Fade intensity (1.0 down to 0.0)
+uniform sampler2D u_ring_tex;
+uniform sampler2D u_font_atlas;
+uniform vec2 u_resolution;
+uniform vec2 u_cell_size;
 uniform float u_time;
+uniform float u_growth;
+uniform float u_shock_radius;
+uniform float u_shock_alpha;
+uniform vec2 u_shock_center;
+uniform int u_mode;          // 0 = Coded & Binary, 1 = Pure Binary, 2 = ASCII Density
+uniform float u_bg_noise;    // Subtle background ambient noise
 
 out vec4 frag_color;
 
+float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
 void main() {
-    if (u_shock_alpha < 0.005) {
-        discard;
+    // 1. Calculate cell grid coordinates
+    vec2 pixel_pos = gl_FragCoord.xy;
+    vec2 cell_idx = floor(pixel_pos / u_cell_size);
+    vec2 in_cell = fract(pixel_pos / u_cell_size);
+
+    // Invert Y for OpenGL font texture coordinates
+    in_cell.y = 1.0 - in_cell.y;
+
+    // 2. Cell center in UV coordinates
+    vec2 cell_uv = (cell_idx * u_cell_size + u_cell_size * 0.5) / u_resolution;
+
+    // Multi-sample the 3D ring buffer within the cell for antialiasing
+    vec4 s0 = texture(u_ring_tex, (cell_idx * u_cell_size + u_cell_size * vec2(0.25, 0.25)) / u_resolution);
+    vec4 s1 = texture(u_ring_tex, (cell_idx * u_cell_size + u_cell_size * vec2(0.75, 0.25)) / u_resolution);
+    vec4 s2 = texture(u_ring_tex, (cell_idx * u_cell_size + u_cell_size * vec2(0.25, 0.75)) / u_resolution);
+    vec4 s3 = texture(u_ring_tex, (cell_idx * u_cell_size + u_cell_size * vec2(0.75, 0.75)) / u_resolution);
+    vec4 ring_data = (s0 + s1 + s2 + s3) * 0.25;
+
+    float lum = ring_data.r;
+    float growth_coord = ring_data.g;
+    float mat_id = ring_data.b;
+    float is_ring = ring_data.a;
+
+    // 3. Concentric Hollow Halo Shockwave Burst
+    float aspect = u_resolution.x / u_resolution.y;
+    vec2 p_shock = cell_uv - u_shock_center;
+    p_shock.x *= aspect;
+    float shock_dist = length(p_shock);
+
+    float halo_intensity = 0.0;
+    if (u_shock_alpha > 0.005) {
+        float radii[3] = float[3](u_shock_radius, u_shock_radius * 0.82, u_shock_radius * 0.65);
+        float weights[3] = float[3](1.0, 0.70, 0.40);
+        float thick[3] = float[3](0.045, 0.038, 0.030);
+
+        for (int i = 0; i < 3; ++i) {
+            float r = radii[i];
+            if (r > 0.01) {
+                float d = abs(shock_dist - r);
+                if (d < thick[i]) {
+                    float edge = 1.0 - d / thick[i];
+                    halo_intensity += pow(edge, 2.0) * weights[i] * u_shock_alpha;
+                }
+            }
+        }
+        // Central radiant burst when first igniting
+        if (u_shock_radius < 0.45) {
+            float core = exp(-pow(shock_dist, 2.0) * 25.0) * (1.0 - u_shock_radius / 0.45);
+            halo_intensity += core * 1.8 * u_shock_alpha;
+        }
     }
 
-    // Normalized radial distance from shockwave center with aspect ratio correction
-    vec2 p = v_uv - u_center;
-    p.x *= u_aspect;
-    float dist = length(p);
+    // 4. Growth frontier glow & flicker
+    float frontier_glow = 0.0;
+    if (is_ring > 0.05 && u_growth < 0.999) {
+        float d_front = u_growth - growth_coord;
+        if (d_front >= 0.0 && d_front < 0.045) {
+            frontier_glow = (1.0 - d_front / 0.045) * 2.2;
+        }
+    }
 
-    vec3 glow_color = vec3(0.0);
+    // 5. Total cell illumination
+    float total_lum = lum * is_ring + halo_intensity * 1.8 + frontier_glow;
+    float cell_rnd = hash21(cell_idx);
 
-    // 3 Concentric Hollow Halo Rings:
-    // Main shockwave wave, secondary trailing wave, and outer leading ripple
-    float radii[3] = float[3](u_shock_radius, u_shock_radius * 0.82, u_shock_radius * 0.65);
-    float weights[3] = float[3](1.0, 0.65, 0.35);
-    float thicknesses[3] = float[3](0.045, 0.035, 0.025);
+    int glyph_idx = 0;
 
-    for (int i = 0; i < 3; ++i) {
-        float r = radii[i];
-        if (r > 0.01) {
-            float ring_dist = abs(dist - r);
-            float thick = thicknesses[i];
-            if (ring_dist < thick) {
-                // Hollow ring profile (sharp peak at r, smooth Gaussian falloff)
-                float edge = 1.0 - ring_dist / thick;
-                float halo = pow(edge, 2.5) * weights[i];
-
-                // Radiant diamond cyan/white energy
-                vec3 ring_col = mix(vec3(0.5, 0.85, 1.0), vec3(1.0, 1.0, 1.2), edge);
-                glow_color += ring_col * halo;
+    if (total_lum < 0.02) {
+        // Outside ring: subtle ambient binary rain background
+        if (u_bg_noise > 0.001 && cell_rnd < 0.22) {
+            glyph_idx = (cell_rnd < 0.11) ? 16 : 17; // '0' or '1'
+            total_lum = u_bg_noise;
+        } else {
+            frag_color = vec4(0.0, 0.0, 0.0, 1.0);
+            return;
+        }
+    } else {
+        // Cell is active!
+        if (frontier_glow > 0.1) {
+            // High-speed machine code binary flicker at materialization frontier
+            float fast_tick = fract(u_time * 18.0 + cell_rnd);
+            glyph_idx = (fast_tick > 0.5) ? 17 : 16; // '1' or '0'
+            total_lum = clamp(total_lum + 0.5, 0.0, 1.6);
+        }
+        else if (u_mode == 1) {
+            // Pure Binary Matrix ('0' and '1')
+            glyph_idx = (cell_rnd > 0.48) ? 17 : 16;
+        }
+        else if (u_mode == 2) {
+            // ASCII Density Ramp
+            int ramp_idx = int(clamp(total_lum * 9.0, 0.0, 9.0));
+            glyph_idx = ramp_idx;
+        }
+        else {
+            // Coded Words & Binary Matrix (Viral Instagram Reel aesthetic)
+            if (mat_id > 0.5 && is_ring > 0.5) {
+                // Diamond Gemstone: Crystalline code symbols & facet tokens
+                if (total_lum > 0.85) {
+                    // High specular glints: dense glowing characters
+                    int hi_glyphs[4] = int[4](9, 7, 57, 73); // '@', '#', 'gem', '1111'
+                    glyph_idx = hi_glyphs[int(cell_rnd * 4.0) % 4];
+                } else if (total_lum > 0.45) {
+                    int mid_glyphs[6] = int[6](32, 33, 34, 35, 38, 39); // '{', '}', '[', ']', '<', '>'
+                    glyph_idx = mid_glyphs[int(cell_rnd * 6.0) % 6];
+                } else {
+                    int lo_glyphs[4] = int[4](6, 5, 22, 17); // '*', '+', '101', '1'
+                    glyph_idx = lo_glyphs[int(cell_rnd * 4.0) % 4];
+                }
+            } else {
+                // Platinum Band & Prongs: Stream of binary digits and coded words
+                if (cell_rnd < 0.45) {
+                    int bin_glyphs[4] = int[4](16, 17, 20, 21); // '0', '1', '01', '10'
+                    glyph_idx = bin_glyphs[int(cell_rnd * 10.0) % 4];
+                } else if (cell_rnd < 0.80) {
+                    int kw_glyphs[7] = int[7](48, 51, 53, 58, 64, 65, 61); // 'def', 'vec', 'rot', 'void', 'byte', 'math', '0x1'
+                    glyph_idx = kw_glyphs[int(cell_rnd * 15.0) % 7];
+                } else {
+                    int sym_glyphs[5] = int[5](32, 33, 40, 7, 6); // '{', '}', ';', '#', '*'
+                    glyph_idx = sym_glyphs[int(cell_rnd * 8.0) % 5];
+                }
             }
         }
     }
 
-    // Central radiant burst when shockwave first ignites (r < 0.3)
-    if (u_shock_radius < 0.45) {
-        float core = exp(-pow(dist, 2.0) * 28.0) * (1.0 - u_shock_radius / 0.45);
-        glow_color += vec3(1.2, 1.3, 1.6) * core * 1.5;
+    // 6. Sample Font Atlas (16x16 grid of 32x32 tiles in 512x512 texture)
+    float tile_x = float(glyph_idx % 16);
+    float tile_y = float(glyph_idx / 16);
+    vec2 atlas_uv = (vec2(tile_x, tile_y) + clamp(in_cell, 0.001, 0.999)) / 16.0;
+
+    float glyph_alpha = texture(u_font_atlas, atlas_uv).r;
+
+    // 7. Pure Monochrome Black & White Color Tone
+    float boost = pow(clamp(total_lum, 0.0, 3.0), 0.65) * 1.55;
+    float white_val = clamp(glyph_alpha * boost, 0.0, 1.0);
+
+    // Shockwave ripple boost
+    if (halo_intensity > 0.05) {
+        white_val = max(white_val, halo_intensity * glyph_alpha * 2.2);
     }
 
-    float total_alpha = clamp(length(glow_color) * u_shock_alpha, 0.0, 1.0);
-    frag_color = vec4(glow_color * u_shock_alpha, total_alpha);
-}
-"""
-
-# --- 3. STUDIO BACKGROUND & SOFT LIGHT SHADER ---
-BG_VERT_SRC = """
-#version 330 core
-
-layout (location = 0) in vec2 in_pos;
-out vec2 v_uv;
-
-void main() {
-    v_uv = in_pos * 0.5 + 0.5;
-    gl_Position = vec4(in_pos, 0.9999, 1.0);
-}
-"""
-
-BG_FRAG_SRC = """
-#version 330 core
-
-in vec2 v_uv;
-uniform float u_time;
-uniform vec2 u_resolution;
-
-out vec4 frag_color;
-
-void main() {
-    vec2 p = (v_uv - 0.5) * 2.0;
-
-    // Obsidian black deep studio backdrop
-    vec3 col_center = vec3(0.035, 0.045, 0.065);
-    vec3 col_edge   = vec3(0.005, 0.006, 0.009);
-
-    float vignette = length(p * vec2(1.0, 1.25));
-    vec3 bg = mix(col_center, col_edge, smoothstep(0.1, 1.4, vignette));
-
-    // Subtle overhead soft spotlight cone
-    float spot = exp(-pow(p.x, 2.0) * 3.5) * exp(-pow(p.y - 0.4, 2.0) * 1.5) * 0.06;
-    bg += vec3(0.6, 0.75, 0.95) * spot;
-
-    // Gentle breathing floating bokeh particles
-    float bokeh = sin(p.x * 12.0 + u_time * 0.4) * cos(p.y * 12.0 - u_time * 0.3);
-    if (bokeh > 0.92) {
-        bg += vec3(0.3, 0.5, 0.7) * (bokeh - 0.92) * 0.8;
-    }
-
-    frag_color = vec4(bg, 1.0);
+    frag_color = vec4(vec3(white_val), 1.0);
 }
 """

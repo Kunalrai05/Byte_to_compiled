@@ -1,34 +1,33 @@
-# 💍 Episode 03: 3D Diamond Engagement Ring // Procedural Generation & Concentric Halo Shockwave
+# 💍 Episode 03: 3D Diamond Engagement Ring // Monochrome Coded & Binary Matrix
 
-> **Real-Time OpenGL 3.3 Engine:** A mathematically rigorous 3D simulation of a **Solitaire Diamond Engagement Ring** built in Python with **ModernGL**, **Pygame**, and **GLSL Shaders**. Features progressive **bottom-to-top procedural materialization**, an **expanding concentric hollow halo shockwave**, and **physically modeled diamond chromatic dispersion with continuous 3D orbit**.
+> **Real-Time OpenGL 3.3 Engine & Matrix Typography:** A mathematically derived 3D simulation of a **Solitaire Diamond Engagement Ring** rendered as a **monochrome Black & White matrix** composed of **pixelated binary digits (`0`, `1`) and programming keywords (`def`, `vec`, `gem`, `void`, `{}`, `<>`)**. Built with **ModernGL**, **Pygame**, and **GLSL Shaders**, featuring progressive **bottom-to-top materialization**, an **expanding concentric hollow halo shockwave burst**, and **continuous 3D orbit with facet glints**.
 
 ---
 
-## 🎯 Visual Progression & Architecture
+## 🎯 Visual Progression & Pipeline
 
 ```
-[0.0s – 4.0s]             [4.0s – 5.5s]                        [5.2s – End]
-Progressive Materialization -> Concentric Hollow Shockwave -> 3D Continuous Orbit
-(Bottom-to-Top Growth)        (Center to Screen Edges Burst)   (Dispersion & Glints)
+[0.0s – 4.0s]                  [4.0s – 5.5s]                        [5.2s – End]
+Progressive Materialization  -> Concentric Hollow Shockwave -> 3D Continuous Orbit
+(Bottom-to-Top Binary Sweep)    (Center to Screen Edges Burst)   (Facet Glints Across Code)
 ```
 
-1. **Phase 1: Bottom-to-Top Materialization ($0.0\text{s} \to 4.0\text{s}$)**
-   - The platinum torus band materializes upward from the ground contact plane with glowing crystalline spark frontiers.
+1. **Phase 1: Bottom-to-Top Procedural Generation ($0.0\text{s} \to 4.0\text{s}$)**
+   - The platinum band materializes upward from the ground plane with an electrifying machine-code binary flicker frontier (`0` and `1` cycling at 18 Hz).
    - Four secure radial prongs curve upward around the crown.
-   - The brilliant-cut diamond crystallizes at the top with facet geometry and chromatic fire.
+   - The 57-facet brilliant-cut diamond crystallizes at the crown, rendered in crystalline code symbols (`@`, `#`, `gem`, `1111`, `{}`, `[]`, `<>`).
 2. **Phase 2: Concentric Hollow Halo Shockwave Burst ($4.0\text{s} \to 5.5\text{s}$)**
-   - The exact moment generation completes, a concentric multi-ring hollow circle shockwave ignites from the center.
-   - Sweeps outward across the entire screen all the way to the screen boundaries with Gaussian intensity falloff.
-3. **Phase 3: Graceful 3D Orbit & Chromatic Dispersion ($5.2\text{s}+$ onwards)**
-   - The ring initiates smooth 3D rotation with 3-wavelength chromatic refraction ($n_r = 2.40, n_g = 2.42, n_b = 2.44$).
-   - High-exponent Blinn-Phong specular glints shimmer across the crown and pavilion facets.
+   - The instant generation completes, a multi-ring concentric hollow circle shockwave ignites from the center $(0.50, 0.52)$.
+   - Sweeps outward across the entire screen all the way to the screen boundaries, illuminating the matrix grid in radiant white ripples.
+3. **Phase 3: Continuous 3D Orbit ($5.2\text{s}+$ onwards)**
+   - The ring initiates smooth 3D rotation with 3D normals and Blinn-Phong specular glints traveling dynamically across the coded typography.
 
 ---
 
 ## 🚀 Quick Start & Interactive Controls
 
 ### Full Laptop Screen Interactive Simulation (Default: 1536x864 Borderless)
-Run the engine directly to open the full-screen 3D view (ideal for manual recording with phone camera):
+Run the engine directly to open the full-screen 3D view (ideal for manual recording with a phone camera):
 
 ```bash
 cd 03_diamond_ring
@@ -45,6 +44,9 @@ python generate_diamond_ring.py --windowed
 | :--- | :--- |
 | **`Spacebar`** | Pause / Resume animation timeline |
 | **`R`** | Replay simulation from $t = 0.0\text{s}$ (watch materialization & shockwave burst again) |
+| **`M`** | Cycle visual mode: `0` (Coded Words + Binary) $\to$ `1` (Pure Binary `0`/`1`) $\to$ `2` (ASCII Density Ramp) |
+| **`B`** | Toggle background subtle ambient digital rain ON / OFF (pure `#000000` void) |
+| **`1` / `2` / `3`** | Adjust cell size: `1` (Fine 7x10) \| `2` (Medium 9x13) \| `3` (Large 12x17) |
 | **Left Click + Drag** | Interactive 3D camera orbit (Yaw & Pitch) |
 | **Right Click + Drag** | Pan target point |
 | **Mouse Scroll** | Dynamic camera zoom (Distance) |
@@ -64,6 +66,9 @@ python generate_diamond_ring.py --export
 
 # Full HD 1080x1920 @ 30 FPS
 python generate_diamond_ring.py --export --res 1080x1920
+
+# Pure Binary Matrix Mode Export
+python generate_diamond_ring.py --export --mode 1
 ```
 
 The output video will be written to:
@@ -99,70 +104,27 @@ The diamond is modeled with four distinct geometric facet zones:
 * **Culet Vertex:** Bottom sharp tip at $Y = 1.06$.
 * **Pavilion Facets:** Converging triangular facets connecting the culet to the girdle ($Y = 1.34, R = 0.46$).
 * **Crown Facets:** Bezel and kite facets sloping from the girdle to the table facet ($Y = 1.58, R = 0.28$).
-* **Table Facet:** Planar octagonal cap facet.
+* **Table Facet:** Planar octagonal cap facet at $Y = 1.58$.
 * Growth parameter: $g_{\text{gem}}(Y) = 0.75 + 0.25 \cdot \frac{Y - Y_{\text{culet}}}{Y_{\text{table}} - Y_{\text{culet}}} \in [0.75, 1.00]$.
 
 ---
 
-## 💡 GLSL Shader Pipeline
+## 💡 Two-Pass GLSL Shader Architecture
 
-### 1. Progressive Growth Frontier & Crystalline Sparks
-In `RING_FRAG_SRC`, geometry fragments above the active threshold $u\_growth$ are discarded:
-```glsl
-if (mat_id < 1.5) {
-    if (v_growth > u_growth) {
-        discard;
-    }
-}
-```
-A luminous spark border illuminates the active frontier:
-```glsl
-float dist_to_frontier = u_growth - v_growth;
-if (dist_to_frontier >= 0.0 && dist_to_frontier < 0.035) {
-    float frontier_glow = (1.0 - dist_to_frontier / 0.035);
-    vec3 spark_col = vec3(0.4, 0.9, 1.2) * 4.0;
-    final_rgb += spark_col * frontier_glow;
-}
-```
+### Pass 1: 3D Ring Render to Offscreen Framebuffer (FBO)
+* Vertex shader projects 3D coordinates and normals using MVP matrices.
+* Fragment shader discards fragments with $v_{\text{growth}} > u_{\text{growth}}$ during progressive generation.
+* Computes Blinn-Phong specular, metallic rim, and facet reflections:
+  $$\text{FragColor} = \big[ \text{Luminance}, \; v_{\text{growth}}, \; \text{MatID}, \; \text{Visibility} \big]$$
 
-### 2. Chromatic Diamond Refraction & Prismatic Fire
-Diamond light refraction is modeled using Snell's Law across three color wavelengths:
-```glsl
-vec3 R_red   = refract(-V, N, 1.0 / 2.40);
-vec3 R_green = refract(-V, N, 1.0 / 2.42);
-vec3 R_blue  = refract(-V, N, 1.0 / 2.44);
-
-float fire_r = pow(max(dot(R_red, L_key), 0.0), 8.0) * 0.75;
-float fire_g = pow(max(dot(R_green, L_key), 0.0), 8.0) * 0.75;
-float fire_b = pow(max(dot(R_blue, L_key), 0.0), 8.0) * 0.95;
-vec3 fire = vec3(fire_r, fire_g, fire_b);
-```
-
-### 3. Concentric Hollow Halo Shockwave
-In `SHOCKWAVE_FRAG_SRC`, 3 concentric rings expand from the ring center with aspect-ratio correction:
-```glsl
-vec2 p = v_uv - u_center;
-p.x *= u_aspect;
-float dist = length(p);
-
-float radii[3] = float[3](u_shock_radius, u_shock_radius * 0.82, u_shock_radius * 0.65);
-float weights[3] = float[3](1.0, 0.65, 0.35);
-float thicknesses[3] = float[3](0.045, 0.035, 0.025);
-
-for (int i = 0; i < 3; ++i) {
-    float r = radii[i];
-    if (r > 0.01) {
-        float ring_dist = abs(dist - r);
-        float thick = thicknesses[i];
-        if (ring_dist < thick) {
-            float edge = 1.0 - ring_dist / thick;
-            float halo = pow(edge, 2.5) * weights[i];
-            vec3 ring_col = mix(vec3(0.5, 0.85, 1.0), vec3(1.0, 1.0, 1.2), edge);
-            glow_color += ring_col * halo;
-        }
-    }
-}
-```
+### Pass 2: Fullscreen Coded Matrix & Concentric Halo Rasterizer
+* Divides the screen into monospaced character cells $(c_x, c_y) = \lfloor \mathbf{x} / \mathbf{s}_{\text{cell}} \rfloor$.
+* Samples the 3D ring buffer at the cell center to extract surface luminance and material properties.
+* Maps the cell to a 512x512 texture atlas of monospaced typography (`Consolas`):
+  * **Diamond Facets:** High-density crystalline glyphs (`@`, `#`, `gem`, `1111`, `{}`, `<>`).
+  * **Band & Prongs:** Binary streams (`0`, `1`, `01`, `10`) and short keywords (`def`, `vec`, `rot`, `void`, `byte`, `math`, `0x1`).
+  * **Materialization Frontier:** Rapid binary cycling (`0`/`1` at 18 Hz) with localized luminescence boost.
+  * **Concentric Halo Burst:** Calculates radial distance $r = \| (u - u_c) \cdot (\text{aspect}, 1) \|$ and sweeps hollow Gaussian rings across the matrix to all screen edges.
 
 ---
 
@@ -171,8 +133,9 @@ for (int i = 0; i < 3; ++i) {
 ```
 03_diamond_ring/
 ├── generate_diamond_ring.py  # Interactive 60 FPS full laptop screen app & headless video exporter
-├── ring_geometry.py          # Procedural 3D parametric meshes (band, prongs, diamond, studio floor)
-├── shaders.py                # GLSL shaders (PBR metallic, chromatic dispersion, shockwave halo)
+├── font_atlas.py             # Monospaced font atlas texture generator (Consolas typography)
+├── ring_geometry.py          # Procedural 3D parametric meshes (band, prongs, diamond)
+├── shaders.py                # GLSL shaders (Pass 1: 3D FBO render; Pass 2: Coded Matrix & Halo)
 ├── math_utils.py             # 4x4 matrix transforms, perspective projection, interpolation
 └── README.md                 # Technical code documentation
 ```

@@ -1,13 +1,16 @@
 """
-3D Diamond Engagement Ring Simulation & Generation Engine.
+Monochrome Coded & Binary 3D Diamond Engagement Ring Simulation.
 Episode 03 of Byte to Compiled.
 
 Features:
 1. Full Laptop Screen Display (1536x864, 60 FPS, Borderless Fullscreen default).
-2. Phase 1 (0.0s - 4.0s): Bottom-to-Top Materialization (band -> 4 prongs -> brilliant diamond).
-3. Phase 2 (4.0s - 5.5s): Concentric Hollow Halo Shockwave Burst expanding from center to all edges.
-4. Phase 3 (5.5s+): Graceful 3D Rotation with diamond refraction & facet glints.
-5. Headless 9:16 MP4 video exporter for Instagram Reels & YouTube Shorts.
+2. Pure Monochrome Black & White Aesthetic (#000000 backdrop, brilliant #FFFFFF coded typography).
+3. Ring structure rendered in pixelated binary digits ('0', '1') and programming keywords ('def', 'vec', 'gem', 'void', '{}', '<>').
+4. Phase 1 (0.0s - 4.0s): Bottom-to-Top Materialization with rapid machine code binary flicker at the frontier.
+5. Phase 2 (4.0s - 5.5s): Concentric Hollow Halo Shockwave Burst sweeping from center to all screen edges.
+6. Phase 3 (5.2s+): Graceful 3D continuous rotation with diamond facet specular glints traveling across characters.
+7. Interactive mode toggles (M key: Coded Words / Binary / ASCII; 1/2/3 keys: Cell Size).
+8. Headless 9:16 MP4 video exporter for Instagram Reels & YouTube Shorts.
 """
 
 import sys
@@ -22,11 +25,11 @@ import cv2
 
 from math_utils import (
     perspective_matrix, look_at_matrix, identity_matrix,
-    rotate_x_matrix, rotate_y_matrix, rotate_z_matrix,
-    translation_matrix, scale_matrix, smoothstep, lerp
+    smoothstep, lerp
 )
 import ring_geometry
 import shaders
+import font_atlas
 
 
 def set_uniform(prog, name, val):
@@ -46,10 +49,10 @@ class DiamondRingEngine:
         self.is_headless = is_headless
         self.total_duration = 14.0
 
-        # Animation Timing:
-        # 0.0s to 4.0s: Bottom-to-top growth
+        # Animation Timeline:
+        # 0.0s to 4.0s: Bottom-to-top materialization
         # 4.0s to 5.5s: Concentric hollow halo shockwave burst
-        # 5.5s+: 3D continuous rotation
+        # 5.2s+: 3D continuous rotation
         self.growth_duration = 4.0
         self.shockwave_start = 4.0
         self.shockwave_duration = 1.5
@@ -59,10 +62,19 @@ class DiamondRingEngine:
         self.is_paused = False
         self.sim_time = 0.0
 
+        # Visual Modes
+        # 0: Coded Words & Binary (Default)
+        # 1: Pure Binary Matrix ('0' & '1')
+        # 2: Classic ASCII Density Ramp (' ' to '@')
+        self.mode = 0
+        self.bg_noise = 0.035 # Faint digital ambiance
+        self.cell_w = 9.0
+        self.cell_h = 13.0
+
         # Interactive Camera
         self.cam_yaw = 0.0
         self.cam_pitch = 14.0
-        self.cam_dist = 4.6
+        self.cam_dist = 4.5
         self.cam_target = np.array([0.0, 0.25, 0.0], dtype=np.float32)
         self.mouse_dragging_left = False
         self.mouse_dragging_right = False
@@ -76,7 +88,7 @@ class DiamondRingEngine:
     def _init_window(self):
         """Initialize Pygame display with OpenGL context."""
         pygame.init()
-        pygame.display.set_caption("Episode 03: Diamond Engagement Ring // Materialization & Concentric Halo")
+        pygame.display.set_caption("Episode 03: Coded & Binary Diamond Ring // 3D Procedural Matrix")
 
         display_info = pygame.display.Info()
         self.desktop_w = display_info.current_w
@@ -95,31 +107,28 @@ class DiamondRingEngine:
         self.clock = pygame.time.Clock()
 
     def _init_gl(self):
-        """Initialize ModernGL context and shader programs."""
+        """Initialize ModernGL context, textures, and shader programs."""
         self.ctx = moderngl.create_context()
-        self.ctx.enable(moderngl.DEPTH_TEST)
-        self.ctx.enable(moderngl.BLEND)
-        self.ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
 
-        # 1. Ring PBR Shader
+        # 1. Shaders
         self.ring_prog = self.ctx.program(
             vertex_shader=shaders.RING_VERT_SRC,
             fragment_shader=shaders.RING_FRAG_SRC
         )
-
-        # 2. Concentric Hollow Halo Shockwave Shader
-        self.shock_prog = self.ctx.program(
-            vertex_shader=shaders.SHOCKWAVE_VERT_SRC,
-            fragment_shader=shaders.SHOCKWAVE_FRAG_SRC
+        self.coded_prog = self.ctx.program(
+            vertex_shader=shaders.CODED_VERT_SRC,
+            fragment_shader=shaders.CODED_FRAG_SRC
         )
 
-        # 3. Studio Background Shader
-        self.bg_prog = self.ctx.program(
-            vertex_shader=shaders.BG_VERT_SRC,
-            fragment_shader=shaders.BG_FRAG_SRC
-        )
+        # 2. Font Atlas Texture
+        atlas_bytes, atlas_size = font_atlas.build_font_atlas(tile_w=32, tile_h=32, cols=16, rows=16)
+        self.font_atlas_tex = self.ctx.texture(atlas_size, 1, atlas_bytes)
+        self.font_atlas_tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
 
-        # Setup Fullscreen Quads
+        # 3. Offscreen FBO for 3D Pass
+        self._init_fbo(self.width, self.height)
+
+        # 4. Fullscreen Quad
         quad_verts = np.array([
             -1.0, -1.0,
              1.0, -1.0,
@@ -128,17 +137,29 @@ class DiamondRingEngine:
              1.0,  1.0,
             -1.0,  1.0
         ], dtype=np.float32)
-
         self.quad_vbo = self.ctx.buffer(quad_verts.tobytes())
-        self.bg_vao = self.ctx.vertex_array(self.bg_prog, [(self.quad_vbo, '2f', 'in_pos')])
-        self.shock_vao = self.ctx.vertex_array(self.shock_prog, [(self.quad_vbo, '2f', 'in_pos')])
+        self.quad_vao = self.ctx.vertex_array(self.coded_prog, [(self.quad_vbo, '2f', 'in_pos')])
+
+    def _init_fbo(self, w, h):
+        """Create or resize the 3D ring offscreen framebuffer."""
+        if hasattr(self, 'ring_fbo') and self.ring_fbo:
+            self.ring_fbo.release()
+            self.ring_tex.release()
+            self.ring_depth.release()
+
+        self.ring_tex = self.ctx.texture((w, h), 4, dtype='f2')
+        self.ring_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self.ring_depth = self.ctx.depth_renderbuffer((w, h))
+        self.ring_fbo = self.ctx.framebuffer(
+            color_attachments=[self.ring_tex],
+            depth_attachment=self.ring_depth
+        )
 
     def _init_geometry(self):
-        """Compile procedural 3D meshes (band, prongs, diamond, floor)."""
+        """Compile procedural 3D meshes (band, prongs, diamond gem)."""
         all_verts = []
-        all_verts.extend(ring_geometry.generate_studio_floor(radius=4.5))
-        all_verts.extend(ring_geometry.generate_ring_band(u_segs=100, v_segs=32))
-        all_verts.extend(ring_geometry.generate_prongs(num_steps=24, radial_segs=12))
+        all_verts.extend(ring_geometry.generate_ring_band(u_segs=110, v_segs=36))
+        all_verts.extend(ring_geometry.generate_prongs(num_steps=28, radial_segs=14))
         all_verts.extend(ring_geometry.generate_diamond_gem(num_facets=24))
 
         v_data = np.array(all_verts, dtype=np.float32)
@@ -155,6 +176,7 @@ class DiamondRingEngine:
         self.width = max(100, new_w)
         self.height = max(100, new_h)
         self.ctx.viewport = (0, 0, self.width, self.height)
+        self._init_fbo(self.width, self.height)
 
     def toggle_fullscreen(self):
         """Toggle fullscreen mode smoothly."""
@@ -170,38 +192,34 @@ class DiamondRingEngine:
             self.screen = pygame.display.set_mode((w, h), flags)
             self.resize(w, h)
 
-    def render_scene(self, t, width=None, height=None, is_export=False):
+    def render_scene(self, t, width=None, height=None, target_fbo=None, is_export=False):
         """
-        Render complete 3D scene:
-        1. Studio dark background.
-        2. Progressively materializing 3D ring & diamond (bottom-to-top).
-        3. Concentric hollow halo shockwave burst expanding to all screen edges.
-        4. Graceful 3D rotation once completed.
+        Two-Pass Render Pipeline:
+        Pass 1: Render 3D ring mesh into offscreen FBO (Luminance, Growth, MatID, Vis).
+        Pass 2: Fullscreen coded matrix shader (Rasterizes into pixelated binary digits & code words with shockwave).
         """
         w = width if width is not None else self.width
         h = height if height is not None else self.height
 
-        self.ctx.clear(0.01, 0.01, 0.02, 1.0)
-
-        # 1. Background Studio
-        self.ctx.disable(moderngl.DEPTH_TEST)
-        set_uniform(self.bg_prog, 'u_time', float(t))
-        set_uniform(self.bg_prog, 'u_resolution', (float(w), float(h)))
-        self.bg_vao.render(moderngl.TRIANGLES)
+        # =====================================================================
+        # PASS 1: 3D PARAMETRIC RING GEOMETRY RENDER TO FBO
+        # =====================================================================
+        fbo = self.ring_fbo if not is_export else self.export_ring_fbo
+        fbo.use()
+        self.ctx.viewport = (0, 0, w, h)
+        self.ctx.clear(0.0, 0.0, 0.0, 0.0)
         self.ctx.enable(moderngl.DEPTH_TEST)
+        self.ctx.disable(moderngl.BLEND)
 
-        # 2. Camera Matrices
         aspect = w / float(h)
-        fovy = 38.0 if aspect > 1.0 else 52.0 # Wider FOV for vertical phone orientation
+        fovy = 38.0 if aspect > 1.0 else 52.0
         proj = perspective_matrix(fovy, aspect, 0.1, 50.0)
 
-        # Orbit camera calculation:
-        # Before 5.2s, facing forward with slight tilt.
-        # After 5.2s, starts rotating continuously around vertical Y axis!
+        # 3D Orbit Camera
         auto_yaw = 0.0
         if t > self.rotation_start:
             dt_rot = t - self.rotation_start
-            auto_yaw = dt_rot * 0.70 # Smooth rotation speed
+            auto_yaw = dt_rot * 0.72 # Smooth rotation speed
 
         total_yaw = auto_yaw + math.radians(self.cam_yaw)
         pitch_rad = math.radians(self.cam_pitch)
@@ -214,20 +232,18 @@ class DiamondRingEngine:
         view = look_at_matrix(eye, self.cam_target)
         model = identity_matrix()
 
-        # 3. Growth & Completion Metrics
-        # Growth: 0.0s to 4.0s materializes from 0.0 to 1.0 (bottom to top)
+        # Growth Progress: 0.0 to 1.0 over growth_duration
         if t <= self.growth_duration:
             growth_pct = smoothstep(0.1, self.growth_duration, t)
         else:
             growth_pct = 1.0
 
-        # Completion Flash: bursts at 4.0s and fades by 4.8s
-        if 4.0 <= t <= 4.8:
-            flash_intensity = math.exp(-(t - 4.0) * 5.0)
+        # Completion Flash
+        if 4.0 <= t <= 4.7:
+            flash_intensity = math.exp(-(t - 4.0) * 6.0)
         else:
             flash_intensity = 0.0
 
-        # Render 3D Ring Mesh
         set_uniform(self.ring_prog, 'm_proj', proj.T.tobytes())
         set_uniform(self.ring_prog, 'm_view', view.T.tobytes())
         set_uniform(self.ring_prog, 'm_model', model.T.tobytes())
@@ -236,38 +252,67 @@ class DiamondRingEngine:
         set_uniform(self.ring_prog, 'u_time', float(t))
         set_uniform(self.ring_prog, 'u_flash', float(flash_intensity))
 
-        self.ring_vao.render(moderngl.TRIANGLES, vertices=self.ring_vert_count)
+        vao = self.ring_vao if not is_export else self.export_ring_vao
+        vao.render(moderngl.TRIANGLES, vertices=self.ring_vert_count)
 
-        # 4. CONCENTRIC HOLLOW HALO SHOCKWAVE BURST (t in [4.0s, 5.5s])
-        # Expands outward from the ring center all the way to the edges of the screen!
+        # =====================================================================
+        # PASS 2: FULLSCREEN CODED & BINARY MATRIX RASTERIZER
+        # =====================================================================
+        if target_fbo is not None:
+            target_fbo.use()
+        else:
+            self.ctx.screen.use()
+
+        self.ctx.viewport = (0, 0, w, h)
+        self.ctx.disable(moderngl.DEPTH_TEST)
+
+        # Concentric Hollow Halo Shockwave Calculations
+        shock_radius = 0.0
+        shock_alpha = 0.0
         if self.shockwave_start <= t <= (self.shockwave_start + self.shockwave_duration):
             dt_shock = t - self.shockwave_start
             shock_pct = dt_shock / self.shockwave_duration
+            shock_radius = (shock_pct ** 0.82) * 2.3
+            shock_alpha = (1.0 - shock_pct) ** 1.4
 
-            # Expands rapidly from 0.0 to 2.4 across screen
-            shock_radius = (shock_pct ** 0.82) * 2.2
-            # Fades out smoothly as it reaches the boundaries
-            shock_alpha = (1.0 - shock_pct) ** 1.5
+        # Cell size for export vs screen
+        if is_export:
+            cell_size = (8.0, 12.0)
+        else:
+            cell_size = (self.cell_w, self.cell_h)
 
-            self.ctx.disable(moderngl.DEPTH_TEST)
-            set_uniform(self.shock_prog, 'u_center', (0.5, 0.52)) # Center of diamond ring
-            set_uniform(self.shock_prog, 'u_aspect', float(aspect))
-            set_uniform(self.shock_prog, 'u_shock_radius', float(shock_radius))
-            set_uniform(self.shock_prog, 'u_shock_alpha', float(shock_alpha))
-            set_uniform(self.shock_prog, 'u_time', float(t))
+        ring_tex = self.ring_tex if not is_export else self.export_ring_tex
+        ring_tex.use(location=0)
+        self.font_atlas_tex.use(location=1)
 
-            self.shock_vao.render(moderngl.TRIANGLES)
-            self.ctx.enable(moderngl.DEPTH_TEST)
+        set_uniform(self.coded_prog, 'u_ring_tex', 0)
+        set_uniform(self.coded_prog, 'u_font_atlas', 1)
+        set_uniform(self.coded_prog, 'u_resolution', (float(w), float(h)))
+        set_uniform(self.coded_prog, 'u_cell_size', cell_size)
+        set_uniform(self.coded_prog, 'u_time', float(t))
+        set_uniform(self.coded_prog, 'u_growth', float(growth_pct))
+        set_uniform(self.coded_prog, 'u_shock_radius', float(shock_radius))
+        set_uniform(self.coded_prog, 'u_shock_alpha', float(shock_alpha))
+        set_uniform(self.coded_prog, 'u_shock_center', (0.5, 0.52))
+        set_uniform(self.coded_prog, 'u_mode', int(self.mode))
+        set_uniform(self.coded_prog, 'u_bg_noise', float(self.bg_noise))
+
+        quad_vao = self.quad_vao if not is_export else self.export_quad_vao
+        quad_vao.render(moderngl.TRIANGLES)
 
     def run_interactive(self):
         """Main 60 FPS interactive loop (Full Laptop Screen)."""
         running = True
         print("\n=======================================================")
-        print("  EPISODE 03: 3D DIAMOND RING // MATERIALIZATION & HALO")
+        print("  EPISODE 03: CODED & BINARY 3D DIAMOND RING")
         print("=======================================================")
-        print("  Full Laptop Screen Display (1536x864 60 FPS)")
+        print("  Monochrome Black & White Coded Matrix Engine")
+        print("  Full Laptop Screen Display (1536x864, 60 FPS)")
         print("  * Spacebar    : Pause / Resume animation")
-        print("  * 'R' Key     : Replay from 0.0s (watch generation & halo)")
+        print("  * 'R' Key     : Replay from 0.0s (materialization & halo)")
+        print("  * 'M' Key     : Cycle Mode (0: Coded+Binary, 1: Pure Binary, 2: ASCII)")
+        print("  * 'B' Key     : Toggle Background subtle digital rain")
+        print("  * '1','2','3' : Change Cell Size (Fine, Medium, Large)")
         print("  * Mouse Drag  : Free 3D camera orbit")
         print("  * Mouse Scroll: Zoom in / out")
         print("  * 'F' / 'F11' : Toggle Fullscreen / Windowed")
@@ -297,7 +342,23 @@ class DiamondRingEngine:
                         self.is_paused = not self.is_paused
                     elif event.key == pygame.K_r:
                         self.sim_time = 0.0
-                        print("[*] Replaying Diamond Ring Generation...")
+                        print("[*] Replaying Coded Ring Generation...")
+                    elif event.key == pygame.K_m:
+                        self.mode = (self.mode + 1) % 3
+                        modes = ["Coded Words & Binary Matrix", "Pure Binary Matrix ('0' & '1')", "Classic ASCII Density Ramp"]
+                        print(f"[*] Switched Mode: {modes[self.mode]}")
+                    elif event.key == pygame.K_b:
+                        self.bg_noise = 0.0 if self.bg_noise > 0.001 else 0.035
+                        print(f"[*] Background Ambiance: {'ON' if self.bg_noise > 0.001 else 'OFF'}")
+                    elif event.key == pygame.K_1:
+                        self.cell_w, self.cell_h = 7.0, 10.0
+                        print("[*] Cell Size: Fine (7x10)")
+                    elif event.key == pygame.K_2:
+                        self.cell_w, self.cell_h = 9.0, 13.0
+                        print("[*] Cell Size: Medium (9x13)")
+                    elif event.key == pygame.K_3:
+                        self.cell_w, self.cell_h = 12.0, 17.0
+                        print("[*] Cell Size: Large (12x17)")
                     elif event.key in [pygame.K_f, pygame.K_F11]:
                         self.toggle_fullscreen()
                     elif event.key == pygame.K_e:
@@ -350,111 +411,83 @@ class DiamondRingEngine:
             output_path = os.path.join(os.path.dirname(__file__), "diamond_ring_reel.mp4")
 
         total_frames = int(self.total_duration * fps)
+
         print(f"\n=======================================================")
-        print(f"[*] Exporting 9:16 Vertical Video Reel ({width}x{height})")
+        print(f"[*] Exporting 9:16 Coded Video Reel ({width}x{height})")
         print(f"[*] Frames: {total_frames} | Duration: {self.total_duration}s | FPS: {fps}")
         print(f"[*] Output: {output_path}")
         print(f"=======================================================\n")
 
-        # Headless ModernGL context
-        export_ctx = moderngl.create_context(standalone=True)
-        export_ctx.enable(moderngl.DEPTH_TEST)
-        export_ctx.enable(moderngl.BLEND)
-        export_ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
+        # Headless standalone context if running without display
+        if not hasattr(self, 'ctx') or self.ctx is None:
+            self.ctx = moderngl.create_context(standalone=True)
+            self.ring_prog = self.ctx.program(
+                vertex_shader=shaders.RING_VERT_SRC,
+                fragment_shader=shaders.RING_FRAG_SRC
+            )
+            self.coded_prog = self.ctx.program(
+                vertex_shader=shaders.CODED_VERT_SRC,
+                fragment_shader=shaders.CODED_FRAG_SRC
+            )
+            atlas_bytes, atlas_size = font_atlas.build_font_atlas(tile_w=32, tile_h=32, cols=16, rows=16)
+            self.font_atlas_tex = self.ctx.texture(atlas_size, 1, atlas_bytes)
+            self.font_atlas_tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
 
-        export_fbo = export_ctx.simple_framebuffer((width, height))
-        export_fbo.use()
-
-        ring_prog = export_ctx.program(vertex_shader=shaders.RING_VERT_SRC, fragment_shader=shaders.RING_FRAG_SRC)
-        shock_prog = export_ctx.program(vertex_shader=shaders.SHOCKWAVE_VERT_SRC, fragment_shader=shaders.SHOCKWAVE_FRAG_SRC)
-        bg_prog = export_ctx.program(vertex_shader=shaders.BG_VERT_SRC, fragment_shader=shaders.BG_FRAG_SRC)
-
-        quad_verts = np.array([-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0], dtype=np.float32)
-        quad_vbo = export_ctx.buffer(quad_verts.tobytes())
-        bg_vao = export_ctx.vertex_array(bg_prog, [(quad_vbo, '2f', 'in_pos')])
-        shock_vao = export_ctx.vertex_array(shock_prog, [(quad_vbo, '2f', 'in_pos')])
-
+        # Setup export geometry & FBOs
         all_verts = []
-        all_verts.extend(ring_geometry.generate_studio_floor(radius=4.5))
-        all_verts.extend(ring_geometry.generate_ring_band(u_segs=100, v_segs=32))
-        all_verts.extend(ring_geometry.generate_prongs(num_steps=24, radial_segs=12))
+        all_verts.extend(ring_geometry.generate_ring_band(u_segs=110, v_segs=36))
+        all_verts.extend(ring_geometry.generate_prongs(num_steps=28, radial_segs=14))
         all_verts.extend(ring_geometry.generate_diamond_gem(num_facets=24))
 
         v_data = np.array(all_verts, dtype=np.float32)
-        ring_vbo = export_ctx.buffer(v_data.tobytes())
-        ring_vao = export_ctx.vertex_array(
-            ring_prog,
-            [(ring_vbo, '3f 3f 3f 2f 1f 3f', 'in_position', 'in_normal', 'in_color', 'in_uv', 'in_growth', 'in_mat')]
+        export_ring_vbo = self.ctx.buffer(v_data.tobytes())
+        self.export_ring_vao = self.ctx.vertex_array(
+            self.ring_prog,
+            [(export_ring_vbo, '3f 3f 3f 2f 1f 3f',
+              'in_position', 'in_normal', 'in_color', 'in_uv', 'in_growth', 'in_mat')]
         )
-        vert_count = len(all_verts) // 15
+        self.ring_vert_count = len(all_verts) // 15
+
+        quad_verts = np.array([
+            -1.0, -1.0,
+             1.0, -1.0,
+             1.0,  1.0,
+            -1.0, -1.0,
+             1.0,  1.0,
+            -1.0,  1.0
+        ], dtype=np.float32)
+        export_quad_vbo = self.ctx.buffer(quad_verts.tobytes())
+        self.export_quad_vao = self.ctx.vertex_array(self.coded_prog, [(export_quad_vbo, '2f', 'in_pos')])
+
+        self.export_ring_tex = self.ctx.texture((width, height), 4, dtype='f2')
+        self.export_ring_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
+        self.export_ring_depth = self.ctx.depth_renderbuffer((width, height))
+        self.export_ring_fbo = self.ctx.framebuffer(
+            color_attachments=[self.export_ring_tex],
+            depth_attachment=self.export_ring_depth
+        )
+
+        # Final output FBO
+        export_out_tex = self.ctx.texture((width, height), 4)
+        export_out_fbo = self.ctx.framebuffer(color_attachments=[export_out_tex])
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
         t_start = time.time()
-        aspect = width / float(height)
-        proj = perspective_matrix(52.0, aspect, 0.1, 50.0)
 
         for frame_idx in range(total_frames):
-            t = (frame_idx / float(fps))
+            sim_t = frame_idx / float(fps)
 
-            export_fbo.use()
-            export_ctx.clear(0.01, 0.01, 0.02, 1.0)
+            self.render_scene(
+                sim_t,
+                width=width,
+                height=height,
+                target_fbo=export_out_fbo,
+                is_export=True
+            )
 
-            # 1. Background
-            export_ctx.disable(moderngl.DEPTH_TEST)
-            set_uniform(bg_prog, 'u_time', float(t))
-            set_uniform(bg_prog, 'u_resolution', (float(width), float(height)))
-            bg_vao.render(moderngl.TRIANGLES)
-            export_ctx.enable(moderngl.DEPTH_TEST)
-
-            # 2. Camera View & Rotation
-            auto_yaw = 0.0
-            if t > self.rotation_start:
-                auto_yaw = (t - self.rotation_start) * 0.70
-
-            pitch_rad = math.radians(14.0)
-            eye_x = self.cam_dist * math.cos(pitch_rad) * math.sin(auto_yaw)
-            eye_y = 0.25 + self.cam_dist * math.sin(pitch_rad)
-            eye_z = self.cam_dist * math.cos(pitch_rad) * math.cos(auto_yaw)
-            eye = np.array([eye_x, eye_y, eye_z], dtype=np.float32)
-
-            view = look_at_matrix(eye, self.cam_target)
-            model = identity_matrix()
-
-            growth_pct = smoothstep(0.1, self.growth_duration, t) if t <= self.growth_duration else 1.0
-            flash_intensity = math.exp(-(t - 4.0) * 5.0) if 4.0 <= t <= 4.8 else 0.0
-
-            # 3. Render Ring Mesh
-            set_uniform(ring_prog, 'm_proj', proj.T.tobytes())
-            set_uniform(ring_prog, 'm_view', view.T.tobytes())
-            set_uniform(ring_prog, 'm_model', model.T.tobytes())
-            set_uniform(ring_prog, 'u_cam_pos', tuple(eye))
-            set_uniform(ring_prog, 'u_growth', float(growth_pct))
-            set_uniform(ring_prog, 'u_time', float(t))
-            set_uniform(ring_prog, 'u_flash', float(flash_intensity))
-
-            ring_vao.render(moderngl.TRIANGLES, vertices=vert_count)
-
-            # 4. Concentric Halo Shockwave Burst
-            if self.shockwave_start <= t <= (self.shockwave_start + self.shockwave_duration):
-                dt_shock = t - self.shockwave_start
-                shock_pct = dt_shock / self.shockwave_duration
-                shock_radius = (shock_pct ** 0.82) * 2.2
-                shock_alpha = (1.0 - shock_pct) ** 1.5
-
-                export_ctx.disable(moderngl.DEPTH_TEST)
-                set_uniform(shock_prog, 'u_center', (0.5, 0.52))
-                set_uniform(shock_prog, 'u_aspect', float(aspect))
-                set_uniform(shock_prog, 'u_shock_radius', float(shock_radius))
-                set_uniform(shock_prog, 'u_shock_alpha', float(shock_alpha))
-                set_uniform(shock_prog, 'u_time', float(t))
-
-                shock_vao.render(moderngl.TRIANGLES)
-                export_ctx.enable(moderngl.DEPTH_TEST)
-
-            # Read back frame
-            raw_bytes = export_fbo.read(components=3)
+            raw_bytes = export_out_fbo.read(components=3)
             frame_np = np.frombuffer(raw_bytes, dtype=np.uint8).reshape((height, width, 3))
             frame_np = np.flipud(frame_np)
             frame_bgr = cv2.cvtColor(frame_np, cv2.COLOR_RGB2BGR)
@@ -469,21 +502,25 @@ class DiamondRingEngine:
                 print(f"  Rendering: [{frame_idx+1:03d}/{total_frames:03d}] {pct:5.1f}% | Speed: {rate:4.1f} fps | ETA: {remaining:4.1f}s", end='\r')
 
         writer.release()
-        ring_vao.release()
-        ring_vbo.release()
-        shock_vao.release()
-        bg_vao.release()
-        quad_vbo.release()
-        export_fbo.release()
+        self.export_ring_vao.release()
+        export_ring_vbo.release()
+        self.export_quad_vao.release()
+        export_quad_vbo.release()
+        self.export_ring_fbo.release()
+        self.export_ring_tex.release()
+        self.export_ring_depth.release()
+        export_out_fbo.release()
+        export_out_tex.release()
 
         print(f"\n[+] Export Complete in {time.time() - t_start:.1f}s!")
         print(f"[+] Video Reel saved successfully at:\n    {output_path}\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Episode 03: 3D Diamond Ring Generation & Halo Burst")
+    parser = argparse.ArgumentParser(description="Episode 03: Monochrome Coded & Binary Diamond Ring")
     parser.add_argument("--export", action="store_true", help="Render and export 14s MP4 video reel")
     parser.add_argument("--windowed", action="store_true", help="Launch in windowed mode instead of fullscreen")
+    parser.add_argument("--mode", type=int, default=0, help="0: Coded Words & Binary, 1: Pure Binary, 2: ASCII")
     parser.add_argument("--res", type=str, default="720x1280", help="Resolution for export, e.g. 720x1280 or 1080x1920")
     args = parser.parse_args()
 
@@ -493,10 +530,12 @@ def main():
         except Exception:
             w, h = 720, 1280
         engine = DiamondRingEngine(width=w, height=h, fullscreen=False, is_headless=True)
+        engine.mode = args.mode
         engine.export_video_reel(width=w, height=h)
     else:
         fullscreen = not args.windowed
         engine = DiamondRingEngine(fullscreen=fullscreen, is_headless=False)
+        engine.mode = args.mode
         engine.run_interactive()
 
 
