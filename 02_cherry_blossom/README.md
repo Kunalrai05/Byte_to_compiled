@@ -4,33 +4,6 @@
 
 ---
 
-## 🎬 Instagram Reel Structure & Virality Guide
-
-### 1. The Video Format (9:16 Vertical)
-* **0:00 – 0:03 (The Hook — Calm & Peaceful):** Show the laptop screen with VS Code displaying `generate_sakura_animation.py` and the glowing cyber wireframe of the ancient bonsai trunk pushing up from the lush green meadow against a twilight evening sky.
-  * **Text on Screen:** *"You loved the Lily… so I coded a full Cherry Blossom Tree in Python. 🌸✨"*
-* **0:03 – 0:08 (The Growth — Stage 1 & 2):** Cut to full screen. Watch the ancient trunk and sprawling boughs unfurl across the sunset sky as the setting sun warms the horizon, the blurred city skyline shadows appear with twinkling lights, and hundreds of 5-petaled notched blossoms begin to materialize.
-  * **Text on Screen:** *"Bonsai Moyogi splines & cloud-canopy mathematics 🌿"*
-* **0:08 – 0:14 (The Climax — Full Bloom & Peaceful Breeze):** Wireframes dissolve into 100% photorealistic, luminous blush-pink blossom clouds bathed in golden-amber evening light. The spring breeze begins to sway the branches, and a peaceful shower of cherry blossom petals (*Hanafubuki*) gently drifts across the green grass into the camera under twilight stars.
-  * **Text on Screen:** *"Hanafubuki (Cherry Blossom Blizzard) compiled in pure Python. 🌸"*
-
-### 2. Ready-to-Copy Instagram Caption
-```text
-close your eyes, take a deep breath, and let this peaceful cherry blossom tree bloom… 🌸🕊️✨
-
-an ancient bonsai cherry tree (Prunus Serrulata / 桜の木) growing on a lush green meadow at evening dusk as the sun sets behind a distant blurred city silhouette, accompanied by twinkling evening stars, falling petals (花吹雪 — Hanafubuki), and a gentle spring breeze.
-
-🌸 save this reel for when you need a calm, peaceful moment 💌
-👇 drop your favourite tree or flower & I’ll code it next!
-
-#cherryblossom #sakurabloom #creativecoding #pythonprogramming #zenvibes #calmingvideos #generativeart #shaders #satisfyingvideos #ambientvibes #techreels
-```
-
-### 3. Recommended Audio / Music
-* Aesthetic Japanese lofi, soothing koto synth, or gentle slow piano (*e.g. Joe Hisaishi - Summer / One Summer's Day / Merry-Go-Round of Life lofi, or aesthetic slow ambient music*).
-
----
-
 ## 🚀 Quick Start
 
 ### 1. Interactive 3D Real-Time Engine (60 FPS)

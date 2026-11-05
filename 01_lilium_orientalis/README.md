@@ -4,31 +4,6 @@
 
 ---
 
-## 🎬 Instagram Reel Structure & Virality Guide
-
-### 1. The Video Format (9:16 Vertical)
-* **0:00 – 0:03 (The Hook):** Show your laptop with VS Code on the left displaying `generate_lily_animation.py` and the initial wireframe growth on the right.
-  * **Text on Screen:** *"What happens when imagination meets Python?"*
-* **0:03 – 0:08 (Stage 1 & 2):** Zoom in to full-screen. Watch the glowing vascular stem and lanceolate leaves grow, followed by the blooming kinematics of the 6 petals and stamens.
-* **0:08 – 0:14 (Stage 3 Reveal):** The glowing cyber wireframes materialize into lush, shaded petals with magenta flush, nectar furrows, and golden-brown pollen anthers with floating bokeh spores.
-  * **Text on Screen:** *"Something beautiful gets compiled. 🌷"*
-
-### 2. Ready-to-Copy Instagram Caption
-```text
-my obsession with flowers is getting out of hand… 🌷🎀
-first i admired them, now i'm literally coding them into existence. 💻🪄
-
-🌸 follow for more code turned into art ✨
-💌 drop your favourite flower in the comments & maybe i'll bring it to life in my next reel! 🌷👇
-
-#generativeart #pythonprogramming #creativecoding #codingreels #techreels #mathart #proceduralart #python3 #visualarts
-```
-
-### 3. Recommended Audio / Music
-* Trending aesthetic synthwave, slow piano, or ambient lo-fi tracks (e.g. *resonance*, *interstellar theme lofi*, or classical piano with subtle vinyl crackle).
-
----
-
 ## 🚀 Quick Start
 
 ### 1. Interactive 3D Real-Time Engine (60 FPS)

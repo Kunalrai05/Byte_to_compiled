@@ -1,25 +1,23 @@
-# ⚡ Byte to Compiled — Creative Coding & Botanical Reel Series
+# ⚡ Byte to Compiled — Creative Coding & Mathematical Visualizations
 
 > *"What happens when imagination meets Python? Something beautiful gets compiled."*
 
-Welcome to **Byte to Compiled**, an open-source series of procedural simulations, botanical compilations, and creative coding algorithms engineered specifically for high-engagement, viral Instagram Reels, TikTok, and YouTube Shorts.
+Welcome to **Byte to Compiled**, an open-source series of procedural simulations, 3D botanical compilations, and mathematical creative coding engines written in Python.
 
-Every episode is self-contained, lightweight, and comes equipped with:
-- **Full-Screen Laptop Interactive Viewer** (60 FPS, keyboard/mouse controls)
-- **One-Click 9:16 Vertical MP4 Exporter** (Pre-timed for viral audio drops)
-- **Instagram Reel Templates** (Hooks, comment bait triggers, and audio recommendations)
+Every episode is self-contained and comes equipped with:
+- **Real-Time Interactive Viewer** (60 FPS, keyboard/mouse controls)
+- **One-Click Headless 9:16 Vertical MP4 Exporter** (Direct video generation)
+- **Complete Mathematical Derivations & Shading Architecture**
 
 ---
 
 ## 📽️ Episodes Directory
 
-| # | Episode | Concept | Tech Stack | Status |
+| # | Episode | Concept & Mathematical Model | Tech Stack | Status |
 |:---:|:---|:---|:---:|:---:|
-| **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cyber wireframe growth, Blinn-Phong SSS, and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Completed |
-| **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Majestic Japanese Cherry Blossom Tree growing on a lush green meadow at evening dusk with setting sun, blurred city shadow silhouette, twilight stars, gentle breeze branch sway, and falling petals (Hanafubuki). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Completed |
-| **03** | [**Harmonic Pendulum Wave**](03_pendulum_wave/) | 24-sphere kinetic pendulum wave simulation with frequency dispersion, traveling sine waves, interlaced double-helixes, obsidian floor reflections, and coherent straight line realignment at $t=14.0\text{s}$. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ⏳ Completed |
-| **04** | [**Porsche 911 GT3 RS (992)**](04_porsche_911_gt3rs/) | Aerodynamic active aero simulation with 60-year heritage morph (1974 930 Turbo), 1,600+ wind tunnel CFD streamlines, active DRS flap actuation, 9,000 RPM flat-6 redline, and Nürburgring telemetry HUD. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🏎️ Completed |
-| **05** | [**Fibonacci Sunflower**]() | In Development — Sacred geometry floret distribution at the Golden Angle ($137.508^\circ$) blooming into radiant golden petals. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌻 Upcoming |
+| **01** | [**Lilium Orientalis**](01_lilium_orientalis/) | Procedural 3D blooming Oriental Lily with cubic Bézier spines, Bishop parallel transport frames, organic subsurface scattering (SSS), and scientific HUD telemetry. | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | ✅ Available |
+| **02** | [**Prunus Serrulata (Sakura Tree)**](02_cherry_blossom/) | Japanese Cherry Blossom Tree growing on a green meadow at evening dusk with Moyogi bonsai splines, setting sun, twilight stars, branch sway, and falling petals (*Hanafubuki*). | `ModernGL`, `Pygame`, `NumPy`, `OpenCV` | 🌸 Available |
+| **03** | [**Diamond Engagement Ring**](03_diamond_ring/) | 3D Solitaire Diamond Ring rendered via software Z-buffering and ASCII character shading with optical starburst glints, paired with an authentic VS Code dark editor canvas in a split-screen layout. | `NumPy`, `Pillow`, `OpenCV`, `Pygame` | 💎 Available |
 
 ---
 
@@ -38,43 +36,51 @@ pip install moderngl moderngl-window pygame numpy opencv-python pillow scipy
 
 ---
 
-## 🌸 Episode 02: Prunus Serrulata (Sakura Tree & Peaceful Zen Garden)
+## 💎 Episode 03: 3D Diamond Ring // ASCII Generative Art
 
-### Quick Run (Full Screen):
+### Quick Run:
+```bash
+cd 03_diamond_ring
+python generate_diamond_reel.py
+```
+* **Interactive Controls:**
+  * `Spacebar`: Pause / Resume 3D rotation
+  * `Left` / `Right` Arrow: Manually rotate ring
+  * `F` / `F11`: Toggle Fullscreen / Windowed
+  * `E`: Export direct 9:16 MP4 video
+  * `ESC` / `Q`: Quit
+
+### Headless Video Export:
+```bash
+python generate_diamond_reel.py --export
+```
+
+---
+
+## 🌸 Episode 02: Prunus Serrulata (Japanese Cherry Blossom)
+
+### Quick Run:
 ```bash
 cd 02_cherry_blossom
 python generate_sakura_animation.py
 ```
-* **Full Laptop Screen:** Automatically launches in full screen to showcase the peaceful, serene blooming tree and drifting petals.
-* **Controls:**
-  * `Left Click + Drag`: Orbit in 3D
-  * `Right Click + Drag`: Pan camera
-  * `Mouse Scroll`: Zoom in / out
-  * `Space`: Pause / Resume animation
-  * `H`: Toggle HUD Telemetry on / off (Pure Zen View)
-  * `F` / `F11`: Toggle Fullscreen / Windowed
-  * `W`: Cycle Wireframe / Shaded / Cinematic Mix
-  * `R`: Reset animation
-  * `E`: Export direct 9:16 MP4 Reel video
 
----
-
-## ⏳ Episode 03: Harmonic Pendulum Wave (Kinetic Resonance)
-
-### Quick Run (Full Screen):
+### Headless Video Export:
 ```bash
-cd 03_pendulum_wave
-python generate_pendulum_animation.py
+python generate_sakura_animation.py --export
 ```
-* **Full Laptop Screen:** Launches in full screen with 60 FPS real-time kinetic physics.
-* **Controls:**
-  * `Left Click + Drag`: Orbit camera around the wave in 3D
-  * `Right Click + Drag`: Pan camera target
-  * `Mouse Scroll`: Zoom in / out
-  * `Space`: Pause / Resume animation
-  * `H`: Toggle HUD Telemetry on / off (Pure Cinematic View)
-  * `F` / `F11`: Toggle Fullscreen / Windowed
-  * `W`: Cycle Wireframe / Photorealistic / Cinematic Mix
-  * `R`: Reset animation & camera
-  * `E`: Export direct 9:16 MP4 Reel video
+
 ---
+
+## 🌷 Episode 01: Lilium Orientalis (Blooming Lily)
+
+### Quick Run:
+```bash
+cd 01_lilium_orientalis
+python generate_lily_animation.py
+```
+
+### Headless Video Export:
+```bash
+python generate_lily_animation.py --export
+```
